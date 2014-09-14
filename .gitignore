@@ -1,0 +1,4 @@
+.cabal-sandbox/
+_cache/
+_site/
+dist/
