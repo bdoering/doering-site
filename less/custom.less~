@@ -1,0 +1,28 @@
+body {
+  padding-top: 0px;
+  font-family: 'pontussans','Arial';
+}
+
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'montserratbold', 'Arial';
+    }
+
+.btn-bw {
+  border-width: 3px;
+  border-color: black;
+  background: white;
+  }
+  
+.btn-bw:hover {
+  background: black;
+  border-color:black;
+  color: white;
+  }
+
+
+/*** TEST ***/
+.starter-template {
+//  padding: 40px 15px;
+//  text-align: center;
+}

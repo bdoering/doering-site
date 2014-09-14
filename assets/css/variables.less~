@@ -1,0 +1,5 @@
+/*** COLORS ***/
+@bgDefault      : #ffffff;
+@bgHighlight    : #ffffff;
+@colDefault     : #000000;
+@colHighlight   : #5f009d;

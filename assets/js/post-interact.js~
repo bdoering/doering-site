@@ -1,0 +1,8 @@
+$(document).ready(function () {
+    $('#testp').hide();
+});
+
+$('#btn2').click(function() {
+    $("$testp").toggle('slow');
+});
+    
