@@ -5,16 +5,20 @@ title: About
 About
 =====
 
-Hi, I am Björn J. Döring, and this is my private blog. I work at the [DLR](http://www.dlr.de) (German Aerospace Center) in Oberpfaffenhofen near Munich, Germany. Our [institute's](http://www.dlr.de/hr/en) principal topic is [synthetic aperture radar](https://en.wikipedia.org/wiki/Synthetic_aperture_radar) (SAR), and I am involved in the calibration of systems like [TerraSAR-X](http://www.dlr.de/eo/en/desktopdefault.aspx/tabid-5725/9296_read-15979/), [TanDEM-X](http://www.dlr.de/eo/en/desktopdefault.aspx/tabid-5727/10086_read-21046/), and [Sentinel-1](http://www.esa.int/Our_Activities/Observing_the_Earth/Copernicus/Sentinel-1). I quite enjoy designing and building new hard- and software to get as much performance out of the instruments as possible. Otherwise, I enjoy running, swimming, biking, and traveling to France where my wife is from.
+Hi, I am Björn J. Döring, and this is my private blog. I work at the [DLR](http://www.dlr.de) (German Aerospace Center) in Oberpfaffenhofen near Munich, Germany. Our [institute's](http://www.dlr.de/hr/en) principal topic is [synthetic aperture radar](https://en.wikipedia.org/wiki/Synthetic_aperture_radar) (SAR), and I am involved in the calibration of systems like [TerraSAR-X](http://www.dlr.de/eo/en/desktopdefault.aspx/tabid-5725/9296_read-15979/), [TanDEM-X](http://www.dlr.de/eo/en/desktopdefault.aspx/tabid-5727/10086_read-21046/), and [Sentinel-1](http://www.esa.int/Our_Activities/Observing_the_Earth/Copernicus/Sentinel-1). I quite enjoy designing and building new hard- and software to get as much performance out of the instruments as possible. Mostly in my spare time I am also working on a PhD, which is about the radiometric calibration of SAR systems. Otherwise, I enjoy running, swimming, biking, and traveling to France where my wife is from.
+
+
 
 Contact
 -------
 
-You can reach me at [bjoern.doering@gmail.com](bjoern.doering@gmail.com). 
+You can reach me at [bjoern.doering@gmail.com](bjoern.doering@gmail.com). My OpenPGP key is [B8E29B30](assets/files/bjoern-doering-gmail-com-pubkey.asc).
 
 
 Publications
 ------------
+
+Some selected publications:
 
 * Björn Döring and Marco Schwerdt: [*Introducing Equivalent Radar Cross Section – A First Step Toward new Radiometric Requirement Definitions*](https://www.researchgate.net/publication/259899549_Introducing_Equivalent_Radar_Cross_Section__A_First_Step_Toward_new_Radiometric_Requirement_Definitions). European Conference on Synthetic Aperture Radar (EUSAR), June 2014, Berlin, Germany.
 
@@ -24,7 +28,7 @@ Publications
 
 * Björn J. Döring, Philipp Looser, Matthias Jirousek, and Marco Schwerdt: [*Reference Target Correction Based on Point Target SAR Simulation*](https://www.researchgate.net/publication/225023631_Reference_Target_Correction_Based_on_Point_Target_SAR_Simulation). IEEE Transactions on Geoscience and Remote Sensing, vol. 50, no. 3, 2012.
 
-For downloads and further publications, see [ResearchGate](http://www.researchgate.net/profile/Bjoern_Doering).
+For  further publications and downloads see [ResearchGate](http://www.researchgate.net/profile/Bjoern_Doering).
 
 My ORCID iD is <http://orcid.org/0000-0002-4257-1413>. Maybe it will help to work around the Björn Döring/Bjorn Doring/Bjoern Doering problem?
 

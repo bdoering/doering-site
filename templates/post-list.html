@@ -1,7 +1,9 @@
 <ul>
     $for(posts)$
         <li>
-            <a href="$url$">$title$</a> - $date$
+            <a href="$url$">$title$</a><br />
+	    $if(description)$$description$<br />$endif$
+	    <i>$date$</i>
         </li>
     $endfor$
 </ul>

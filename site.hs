@@ -39,15 +39,14 @@ indexCtx posts =
 
 static :: Rules ()
 static = do
-  let sources = [ "assets/images/*"
-                , "assets/ico/*"
-                , "assets/js/*"
-                , "assets/fonts/*" ]
-  forM_ sources $ \src -> 
-    match src $ do
-      route   idRoute
-      compile copyFileCompiler
-
+  match ("assets/images/*" .||.
+         "assets/ico/*" .||.
+         "assets/js/*" .||.
+         "assets/fonts/*" .||.
+         "assets/files/*") $ do
+           route idRoute
+           compile copyFileCompiler
+  
 index :: Rules ()
 index = do
   match "index.html" $ do
