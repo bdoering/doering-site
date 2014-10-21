@@ -43,7 +43,8 @@ static = do
          "assets/ico/*" .||.
          "assets/js/*" .||.
          "assets/fonts/*" .||.
-         "assets/files/*") $ do
+         "assets/files/*" .||.
+         "CNAME") $ do
            route idRoute
            compile copyFileCompiler
   
