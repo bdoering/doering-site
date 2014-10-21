@@ -12,7 +12,7 @@ Hi, I am Björn J. Döring, and this is my private blog. I work at the [DLR](ht
 Contact
 -------
 
-You can reach me at [bjoern.doering@gmail.com](bjoern.doering@gmail.com). My OpenPGP key is [B8E29B30](assets/files/bjoern-doering-gmail-com-pubkey.asc).
+You can reach me at [bjoern.doering@gmail.com](mailto:bjoern.doering@gmail.com). My OpenPGP key is [B8E29B30](assets/files/bjoern-doering-gmail-com-pubkey.asc).
 
 
 Publications
