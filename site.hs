@@ -5,7 +5,17 @@ import           Text.Pandoc
 import           Control.Monad (forM_)
 import           Hakyll
 import qualified Data.Map as M
+
+import           Abbreviations (abbreviationFilter)
     
+--------------------------------------------------------------------
+-- Text filters
+--------------------------------------------------------------------
+
+applyFilter :: (Monad m, Functor f) => (String -> String) -> f String -> m (f String)
+applyFilter transformator str = return $ (fmap $ transformator) str
+
+
 --------------------------------------------------------------------
 -- Contexts
 --------------------------------------------------------------------
@@ -75,9 +85,10 @@ posts = do
   match "posts/*" $ do
     route $ setExtension "html"
     compile $ pandocCompiler
-      >>= loadAndApplyTemplate "templates/post.html"    postCtx
-      >>= loadAndApplyTemplate "templates/default.html" postCtx
-      >>= relativizeUrls
+        >>= applyFilter abbreviationFilter
+        >>= loadAndApplyTemplate "templates/post.html"    postCtx
+        >>= loadAndApplyTemplate "templates/default.html" postCtx
+        >>= relativizeUrls
 
 archive :: Rules ()
 archive = do
