@@ -2,7 +2,7 @@
 title: Drawing Random Dots with Haskell
 description: A small example of generating SVG files with random dots using Haskell
 tags: Haskell
-extrahead: |
+extrahead: 
   <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
   <link rel="stylesheet" href="//blueimp.github.io/Gallery/css/blueimp-gallery.min.css">
   <link rel="stylesheet" href="/assets/css/bootstrap-image-gallery.min.css">
