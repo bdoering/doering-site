@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title>Björn Döring</title>
+    <link href="http://doering.io/atom.xml" rel="self" />
+    <link href="http://doering.io" />
+    <id>http://doering.io/atom.xml</id>
+    <author>
+        <name>Björn J. Döring</name>
+        <email>bjoern.doering@gmail.com</email>
+    </author>
+    <updated>2014-11-22T00:00:00Z</updated>
+    <entry>
+    <title>Drawing Random Dots with Haskell</title>
+    <link href="http://doering.io/posts/2014-11-22-diagrams-dots.html" />
+    <id>http://doering.io/posts/2014-11-22-diagrams-dots.html</id>
+    <published>2014-11-22T00:00:00Z</published>
+    <updated>2014-11-22T00:00:00Z</updated>
+    <summary type="html"><![CDATA[A small example of generating SVG files with random dots using Haskell]]></summary>
+</entry>
+<entry>
+    <title>Internal Calibration – Or is it?</title>
+    <link href="http://doering.io/posts/2014-10-29-ical.html" />
+    <id>http://doering.io/posts/2014-10-29-ical.html</id>
+    <published>2014-10-29T00:00:00Z</published>
+    <updated>2014-10-29T00:00:00Z</updated>
+    <summary type="html"><![CDATA[On use of terminology in SAR calibration]]></summary>
+</entry>
+<entry>
+    <title>First post: Barefoot Running &amp; Blogging</title>
+    <link href="http://doering.io/posts/2014-09-07-first-post.html" />
+    <id>http://doering.io/posts/2014-09-07-first-post.html</id>
+    <published>2014-09-07T00:00:00Z</published>
+    <updated>2014-09-07T00:00:00Z</updated>
+    <summary type="html"><![CDATA[How barefoot running and blogging fit together]]></summary>
+</entry>
+
+</feed>
