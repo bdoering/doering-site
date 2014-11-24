@@ -1,4 +1,3 @@
---------------------------------------------------------------------------------
 {-# LANGUAGE OverloadedStrings #-}
 import           Data.Monoid (mappend, (<>))
 import           Text.Pandoc 
@@ -89,6 +88,7 @@ posts = do
     compile $ pandocCompiler
         >>= applyFilter abbreviationFilter
         >>= loadAndApplyTemplate "templates/post.html"    postCtx
+        >>= saveSnapshot "content"
         >>= loadAndApplyTemplate "templates/default.html" postCtx
         >>= relativizeUrls
 
@@ -117,6 +117,18 @@ otherPages = do
       >>= loadAndApplyTemplate "templates/default.html" defaultContext
       >>= relativizeUrls
 
+atom :: Rules ()
+atom = do
+  create ["atom.xml"] $ do
+    route idRoute
+    compile $ do
+         -- Overwrite existing description field with complete post
+         -- let feedCtx = bodyField "description" <> postCtx
+         let feedCtx = postCtx
+         posts <- fmap (take 20) . recentFirst =<<
+                  loadAllSnapshots "posts/*" "content"
+         renderAtom feedConfiguration feedCtx posts
+
 --------------------------------------------------------------------
 -- Configuration
 --------------------------------------------------------------------
@@ -129,6 +141,15 @@ pandocOptions = defaultHakyllWriterOptions{ writerHTMLMathMethod = MathJax "" }
 
 cfg :: Configuration
 cfg = defaultConfiguration
+
+feedConfiguration :: FeedConfiguration
+feedConfiguration = FeedConfiguration
+    { feedTitle       = "Björn Döring"
+    , feedDescription = "A private blog"
+    , feedAuthorName  = "Björn J. Döring"
+    , feedAuthorEmail = "bjoern.doering@gmail.com"
+    , feedRoot        = "http://doering.io"
+    }
 
 --------------------------------------------------------------------
 -- Main
@@ -143,8 +164,4 @@ main = hakyllWith cfg $ do
   archive
   templates
   otherPages
-  
-
-
-
-
+  atom
