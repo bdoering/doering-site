@@ -4,7 +4,7 @@ import           Text.Pandoc
 import           Control.Monad (forM_)
 import           Hakyll
 import qualified Data.Map as M
-
+import qualified Data.Set as S
 import           Abbreviations (abbreviationFilter)
     
 --------------------------------------------------------------------
@@ -85,7 +85,7 @@ posts :: Rules ()
 posts = do
   match "posts/*" $ do
     route $ setExtension "html"
-    compile $ pandocCompiler
+    compile $ pandocMathCompiler
         >>= applyFilter abbreviationFilter
         >>= loadAndApplyTemplate "templates/post.html"    postCtx
         >>= saveSnapshot "content"
@@ -133,11 +133,22 @@ atom = do
 -- Configuration
 --------------------------------------------------------------------
 
-compiler :: Compiler (Item String)
-compiler = pandocCompilerWith defaultHakyllReaderOptions pandocOptions
+pandocMathCompiler =
+    let mathExtensions = [Ext_tex_math_dollars, Ext_tex_math_double_backslash,
+                          Ext_latex_macros]
+        defaultExtensions = writerExtensions defaultHakyllWriterOptions
+        newExtensions = foldr S.insert defaultExtensions mathExtensions
+        writerOptions = defaultHakyllWriterOptions {
+                          writerExtensions = newExtensions,
+                          writerHTMLMathMethod = MathJax ""
+                        }
+    in pandocCompilerWith defaultHakyllReaderOptions writerOptions
 
-pandocOptions :: WriterOptions
-pandocOptions = defaultHakyllWriterOptions{ writerHTMLMathMethod = MathJax "" }
+-- compiler :: Compiler (Item String)
+-- compiler = pandocCompilerWith defaultHakyllReaderOptions pandocOptions
+
+-- pandocOptions :: WriterOptions
+-- pandocOptions = defaultHakyllWriterOptions{ writerHTMLMathMethod = MathJax "" }
 
 cfg :: Configuration
 cfg = defaultConfiguration
