@@ -20,13 +20,15 @@ Publications
 
 Some selected publications:
 
-* Björn Döring and Marco Schwerdt: [*Introducing Equivalent Radar Cross Section – A First Step Toward new Radiometric Requirement Definitions*](https://www.researchgate.net/publication/259899549_Introducing_Equivalent_Radar_Cross_Section__A_First_Step_Toward_new_Radiometric_Requirement_Definitions). European Conference on Synthetic Aperture Radar (EUSAR), June 2014, Berlin, Germany.
+* **Björn J. Döring**, Jens Reimann, Sebastian Raab, Matthias Jirousek, Daniel Rudolf, and Marco Schwerdt: [*The Three-Transponder Method: A Novel Method for Accurate Transponder RCS Calibration*](http://www.jpier.org/PIERB/pier.php?paper=14110406). Progress In Electromagnetics Research B, vol. 61, pp. 297--315, Dec. 2014.
 
-* Björn Döring and Marco Schwerdt: [*The Radiometric Measurement Quantity for SAR Images*](https://www.researchgate.net/publication/236992377_The_Radiometric_Measurement_Quantity_for_SAR_Images). IEEE Transactions on Geoscience and Remote Sensing, vol. 51, no. 12, Dec. 2013.
+* **Björn J. Döring** and Marco Schwerdt: [*Introducing Equivalent Radar Cross Section – A First Step Toward new Radiometric Requirement Definitions*](https://www.researchgate.net/publication/259899549_Introducing_Equivalent_Radar_Cross_Section__A_First_Step_Toward_new_Radiometric_Requirement_Definitions). European Conference on Synthetic Aperture Radar (EUSAR), June 2014, Berlin, Germany.
 
-* Björn J. Döring, Kersten Schmidt, Matthias Jirousek, Daniel Rudolf, Jens Reimann, Sebastian Raab, John Walter Antony, and Marco Schwerdt: [*Hierarchical Bayesian Data Analysis in Radiometric SAR System Calibration: A Case Study on Transponder Calibration with RADARSAT-2 Data*](https://www.researchgate.net/publication/259082245_Hierarchical_Bayesian_Data_Analysis_in_Radiometric_SAR_System_Calibration_A_Case_Study_on_Transponder_Calibration_with_RADARSAT-2_Data). Remote Sensing, vol. 5, no. 12, 2013.
+* **Björn J. Döring** and Marco Schwerdt: [*The Radiometric Measurement Quantity for SAR Images*](https://www.researchgate.net/publication/236992377_The_Radiometric_Measurement_Quantity_for_SAR_Images). IEEE Transactions on Geoscience and Remote Sensing, vol. 51, no. 12, Dec. 2013.
 
-* Björn J. Döring, Philipp Looser, Matthias Jirousek, and Marco Schwerdt: [*Reference Target Correction Based on Point Target SAR Simulation*](https://www.researchgate.net/publication/225023631_Reference_Target_Correction_Based_on_Point_Target_SAR_Simulation). IEEE Transactions on Geoscience and Remote Sensing, vol. 50, no. 3, 2012.
+* **Björn J. Döring**, Kersten Schmidt, Matthias Jirousek, Daniel Rudolf, Jens Reimann, Sebastian Raab, John Walter Antony, and Marco Schwerdt: [*Hierarchical Bayesian Data Analysis in Radiometric SAR System Calibration: A Case Study on Transponder Calibration with RADARSAT-2 Data*](https://www.researchgate.net/publication/259082245_Hierarchical_Bayesian_Data_Analysis_in_Radiometric_SAR_System_Calibration_A_Case_Study_on_Transponder_Calibration_with_RADARSAT-2_Data). Remote Sensing, vol. 5, no. 12, 2013.
+
+* **Björn J. Döring**, Philipp Looser, Matthias Jirousek, and Marco Schwerdt: [*Reference Target Correction Based on Point Target SAR Simulation*](https://www.researchgate.net/publication/225023631_Reference_Target_Correction_Based_on_Point_Target_SAR_Simulation). IEEE Transactions on Geoscience and Remote Sensing, vol. 50, no. 3, 2012.
 
 For  further publications and downloads see [ResearchGate](http://www.researchgate.net/profile/Bjoern_Doering).
 
