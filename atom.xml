@@ -8,8 +8,16 @@
         <name>Björn J. Döring</name>
         <email>bjoern.doering@gmail.com</email>
     </author>
-    <updated>2014-11-22T00:00:00Z</updated>
+    <updated>2015-01-26T00:00:00Z</updated>
     <entry>
+    <title>Bayesian Parameter Estimation with Metropolis MCMC in Haskell</title>
+    <link href="http://doering.io/posts/2015-01-26-mcmc-metropolis-in-haskell.html" />
+    <id>http://doering.io/posts/2015-01-26-mcmc-metropolis-in-haskell.html</id>
+    <published>2015-01-26T00:00:00Z</published>
+    <updated>2015-01-26T00:00:00Z</updated>
+    <summary type="html"><![CDATA[A simple linear regression example]]></summary>
+</entry>
+<entry>
     <title>Drawing Random Dots with Haskell</title>
     <link href="http://doering.io/posts/2014-11-22-diagrams-dots.html" />
     <id>http://doering.io/posts/2014-11-22-diagrams-dots.html</id>
