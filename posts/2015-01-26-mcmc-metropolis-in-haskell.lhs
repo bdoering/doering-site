@@ -387,7 +387,7 @@ Metropolis sampler, especially when existing %MCMC libraries are used.
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js" charset="utf-8"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.8/c3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.9/c3.min.js"></script>
 
 <script>
 var chart_testdata = c3.generate({
