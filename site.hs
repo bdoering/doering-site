@@ -49,6 +49,7 @@ indexCtx posts =
 static :: Rules ()
 static = do
   match ("CNAME" .||.
+         "favicon.ico" .||.
          "assets/images/*" .||.
          "assets/ico/*" .||.
          "assets/js/*" .||.
@@ -58,7 +59,7 @@ static = do
          fromRegex "^posts/.*/.*") $ do
            route idRoute
            compile copyFileCompiler
-  
+
 index :: Rules ()
 index = do
   match "index.html" $ do
