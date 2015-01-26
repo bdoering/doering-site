@@ -1,6 +1,6 @@
 ---
 title: Bayesian Parameter Estimation with Metropolis MCMC in Haskell
-description: A small example of generating SVG files with random dots using Haskell
+description: A simple linear regression example
 tags: Haskell, statistics
 extrahead: 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.8/c3.min.css" type="text/css">
