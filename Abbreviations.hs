@@ -3,7 +3,7 @@ import qualified Data.Map    as M
 import           Hakyll (replaceAll)
 
 abbreviationFilter :: String -> String
-abbreviationFilter = replaceAll "%[a-zA-Z0-9_]*" newnaming
+abbreviationFilter = replaceAll "%[a-zA-Z0-9_]+" newnaming
   where
     newnaming matched = case M.lookup cleaned abbreviations of
                           Nothing -> cleaned
@@ -14,6 +14,9 @@ abbreviationFilter = replaceAll "%[a-zA-Z0-9_]*" newnaming
 abbreviations :: M.Map String String
 abbreviations = M.fromList
                 [ ("ERCS", "equivalent radar cross section")
+                , ("JSON", "JavaScript Object Notation")
+                , ("MCMC", "Monte Carlo Markov Chain")
+                , ("MCMCs", "Monte Carlo Markov Chains")
                 , ("SAR", "synthetic aperture radar")
                 , ("SVG", "scalable vector graphics")
                 ]
