@@ -63,7 +63,7 @@
 </div>
 
 <!-- To compile, set up a cabal sandbox and then, from there, run:
-  cabal exec runhaskell ~/path/to/file/2015-01-17-mcmc-metropolis-in-haskell.lhs && cp *.json ~/path/to/posts/doering-site/posts/2015-01-17-mcmc-metropolis-in-haskell/
+  cabal exec runhaskell ~/path/to/file/2015-01-26-mcmc-metropolis-in-haskell.lhs && cp *.json ~/path/to/posts/doering-site/posts/2015-01-26-mcmc-metropolis-in-haskell/
 -->
 <p>When you have some measurement values at hand, you will quite often want to estimate parameters from the data. In principle you now have the choice between frequentist and Bayesian statistics. I believe that Bayesian statistics has many advantages, especially with respect to (<abbr title="synthetic aperture radar">SAR</abbr>) calibration. This is because parameters are regarded as random variables, described by a probability distribution. After estimation, the uncertainty of this estimate is inherently part of the analysis (in form of the width of the probability distribution), which can then be used in a subsequent uncertainty analysis to determine the measurement uncertainty of a measurement result.</p>
 <p>I will leave an introduction to Bayesian data analysis to others<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>, and concentrate here on the implementation of a simple Monte Carlo Markov chain (MCMC), using the <a href="https://en.wikipedia.org/wiki/Metropolis–Hastings_algorithm">Metropolis algorithm</a>. The Metropolis algorithm is maybe the simplest of a range of Markov chain algorithms, and quite instructive to get your feet wet in the field of Bayesian simulation.</p>
@@ -72,7 +72,7 @@
 <h2 id="metropolis-monte-carlo-markov-chain-in-haskell">Metropolis Monte Carlo Markov Chain in Haskell</h2>
 <p>Let’s look at a simple estimation example: linear regression. The idea is that we have measured <span class="math">\(N\)</span> samples <span class="math">\(y_i\)</span>, <span class="math">\(i = 1 \dots N\)</span>, for given <span class="math">\(x_i\)</span>. We want to model the data according to <span class="math">\[y_i = ax_i + b + e_i,\]</span> <span class="math">\[e \sim \mathrm{N}(0, \sigma^2),\]</span> i. e., we want to fit a line through some noisy data. The unknowns are <span class="math">\(a\)</span>, <span class="math">\(b\)</span>, and <span class="math">\(\sigma\)</span>. Alternatively we could have written <span class="math">\[y \sim \mathrm{N}(ax + b, \sigma^2).\]</span></p>
 <p>The concrete example we are going to look at is inspired by a <a href="https://theoreticalecology.wordpress.com/2010/09/17/metropolis-hastings-mcmc-in-r/">post</a> on an implementation of the Metropolis algorithm in <a href="http://www.r-project.org/">R</a>. Here I want to implement it using <a href="https://www.haskell.org/">Haskell</a>, not only to practice the language, but also to explore how well this compiled language lends itself to numerical simulations like this. Thanks to <a href="https://idontgetoutmuch.wordpress.com/2014/03/20/bayesian-analysis-a-conjugate-prior-and-markov-chain-monte-carlo/">another blog post</a>, it was a surprisingly pleasant experience.</p>
-<p>By the way, the <a href="https://github.com/bdoering/doering-site/blob/master/posts/2015-01-17-mcmc-metropolis-in-haskell.lhs">source file</a> of this blog post is a <a href="https://www.haskell.org/haskellwiki/Literate_programming">literate Haskell</a> file which can directly be compiled and executed, should you want to try it out for yourself!</p>
+<p>By the way, the <a href="https://github.com/bdoering/doering-site/blob/master/posts/2015-01-26-mcmc-metropolis-in-haskell.lhs">source file</a> of this blog post is a <a href="https://www.haskell.org/haskellwiki/Literate_programming">literate Haskell</a> file which can directly be compiled and executed, should you want to try it out for yourself!</p>
 <p>Let’s get started with some imports…</p>
 <pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Control.Monad</span>
 <span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Control.Monad.State</span> (evalState)
@@ -300,7 +300,7 @@ var chart_testdata = c3.generate({
     bindto: '#chart_testdata',
     data: {
         x: 'x',
-        url: '2015-01-17-mcmc-metropolis-in-haskell/test-data.json',
+        url: '2015-01-26-mcmc-metropolis-in-haskell/test-data.json',
         mimeType: 'json',
         type: 'scatter',
         colors: {
@@ -323,7 +323,7 @@ var chart_loglikelihood = c3.generate({
     bindto: '#chart_loglikelihood',
     data: {
         x: 'x',
-        url: '2015-01-17-mcmc-metropolis-in-haskell/log-likelihood.json',
+        url: '2015-01-26-mcmc-metropolis-in-haskell/log-likelihood.json',
         mimeType: 'json',
         colors: {
             'y': '#428BCA',
@@ -356,7 +356,7 @@ var chart_traceA = c3.generate({
     bindto: '#chart_trace' + name,
     size: { height: 250 },
     data: {
-        url: '2015-01-17-mcmc-metropolis-in-haskell/trace' + name + '.json',
+        url: '2015-01-26-mcmc-metropolis-in-haskell/trace' + name + '.json',
         mimeType: 'json',
         colors: {
             'data': '#428BCA',
@@ -391,7 +391,7 @@ var chart_histogram = c3.generate({
     size: { height: 250 },
     data: {
         x: 'x',
-        url: '2015-01-17-mcmc-metropolis-in-haskell/histogram' + name + '.json',
+        url: '2015-01-26-mcmc-metropolis-in-haskell/histogram' + name + '.json',
         mimeType: 'json',
         type: 'bar',
         colors: {
