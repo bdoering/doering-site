@@ -8,7 +8,7 @@ mathjax: on
 ---
 
 <!-- To compile, set up a cabal sandbox and then, from there, run:
-  cabal exec runhaskell ~/path/to/file/2015-01-17-mcmc-metropolis-in-haskell.lhs && cp *.json ~/path/to/posts/doering-site/posts/2015-01-17-mcmc-metropolis-in-haskell/
+  cabal exec runhaskell ~/path/to/file/2015-01-26-mcmc-metropolis-in-haskell.lhs && cp *.json ~/path/to/posts/doering-site/posts/2015-01-26-mcmc-metropolis-in-haskell/
 -->
 
 
@@ -71,7 +71,7 @@ post](https://idontgetoutmuch.wordpress.com/2014/03/20/bayesian-analysis-a-conju
 it was a surprisingly pleasant experience.
 
 By the way, the [source
-file](https://github.com/bdoering/doering-site/blob/master/posts/2015-01-17-mcmc-metropolis-in-haskell.lhs)
+file](https://github.com/bdoering/doering-site/blob/master/posts/2015-01-26-mcmc-metropolis-in-haskell.lhs)
 of this blog post is a [literate
 Haskell](https://www.haskell.org/haskellwiki/Literate_programming)
 file which can directly be compiled and executed, should you want to
@@ -394,7 +394,7 @@ var chart_testdata = c3.generate({
     bindto: '#chart_testdata',
     data: {
         x: 'x',
-        url: '2015-01-17-mcmc-metropolis-in-haskell/test-data.json',
+        url: '2015-01-26-mcmc-metropolis-in-haskell/test-data.json',
         mimeType: 'json',
         type: 'scatter',
         colors: {
@@ -417,7 +417,7 @@ var chart_loglikelihood = c3.generate({
     bindto: '#chart_loglikelihood',
     data: {
         x: 'x',
-        url: '2015-01-17-mcmc-metropolis-in-haskell/log-likelihood.json',
+        url: '2015-01-26-mcmc-metropolis-in-haskell/log-likelihood.json',
         mimeType: 'json',
         colors: {
             'y': '#428BCA',
@@ -450,7 +450,7 @@ var chart_traceA = c3.generate({
     bindto: '#chart_trace' + name,
     size: { height: 250 },
     data: {
-        url: '2015-01-17-mcmc-metropolis-in-haskell/trace' + name + '.json',
+        url: '2015-01-26-mcmc-metropolis-in-haskell/trace' + name + '.json',
         mimeType: 'json',
         colors: {
             'data': '#428BCA',
@@ -485,7 +485,7 @@ var chart_histogram = c3.generate({
     size: { height: 250 },
     data: {
         x: 'x',
-        url: '2015-01-17-mcmc-metropolis-in-haskell/histogram' + name + '.json',
+        url: '2015-01-26-mcmc-metropolis-in-haskell/histogram' + name + '.json',
         mimeType: 'json',
         type: 'bar',
         colors: {
