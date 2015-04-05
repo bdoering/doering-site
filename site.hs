@@ -1,11 +1,15 @@
 {-# LANGUAGE OverloadedStrings #-}
-import           Data.Monoid (mappend, (<>))
+import           Control.Applicative (pure, empty)
+import           Data.Maybe
+import           Data.Monoid (mappend, (<>), mconcat)
 import           Text.Pandoc 
 import           Control.Monad (forM_)
 import           Hakyll
 import qualified Data.Map as M
 import qualified Data.Set as S
 import           Abbreviations (abbreviationFilter)
+
+import Hakyll.Core.Identifier
     
 --------------------------------------------------------------------
 -- Text filters
@@ -20,10 +24,12 @@ applyFilter transformator str = return $ (fmap $ transformator) str
 --------------------------------------------------------------------
 
 postCtx :: Context String
-postCtx =
-  dateField "date" "%B %e, %Y"
-  <> mathCtx
-  <> defaultContext
+postCtx = mconcat [ dateField "date" "%B %e, %Y"
+                  , field "toc" $ \item ->
+                      loadBody ((itemIdentifier item) { identifierVersion = Just "toc"})
+                  , mathCtx
+                  , defaultContext
+                  ]
 
 mathCtx :: Context String
 mathCtx = field "mathjax" $ \item -> do
@@ -31,6 +37,78 @@ mathCtx = field "mathjax" $ \item -> do
   return $ if "mathjax" `M.member` metadata
            then "<script type=\"text/javascript\" src=\"http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML\"></script>"
            else ""
+
+useTocCompiler_works item =
+    let
+        test m = if (isJust (M.lookup "useToc" m))
+                 then pure (error $ "no string value for bool field:")
+                 else empty
+    in do
+      metadata <- getMetadata (itemIdentifier item)
+      return $ test metadata
+
+-- | Creates a 'field' to use with the @$if()$@ template macro.
+boolField
+    :: String
+    -> (Item a -> Bool)
+    -> Context a
+boolField name f = field name (\i -> if f i
+    then pure (error $ unwords ["no string value for bool field:",name])
+    else empty)
+
+
+-- field "speakers-names" (\conf -> getSpeakerNameCompiler lang conf) `mappend`
+
+
+
+-- getSpeakerNameCompiler lang conf =
+--     let getName (id, m) =
+--             fromMaybe "" (M.lookup "firstname" m) ++ " " ++
+--             fromMaybe "" (M.lookup "lastname" m)
+--     in do
+--       speakerList <- getSpeakerList conf
+--       speakers <- getSpeakers lang speakerList
+--       return $ intercalate (", ") $ map getName speakers
+
+
+
+
+--    (M.member "toc") (getMetadata (itemIdentifier item))
+
+--isJust $ M.lookup "toc" (getMetadata (itemIdentifier item)) -- do
+              -- metadata <- getMetadata (itemIdentifier item)
+              -- -- isJust (M.lookup "toc" metadata)
+              -- False
+
+-- \item -> ("toc"::String) `M.member` (getMetadata (itemIdentifier item))
+
+-- getToc id = do
+--   metadata <- getMetadata id
+--   if isJust (M.lookup "toc" metadata)
+--   then missingField -- return ""
+--   else loadBody (id { identifierVersion = Just "toc"})
+                
+-- getRoomClass id = do
+-- md <- getMetadata id
+-- return $ case (M.lookup "location" md) of
+-- Just "Room 1" -> "event-maxi"
+-- Just "Room 2" -> "event-mini"
+-- Just "Trempolino" -> "event-trempolino"
+-- _ -> ""
+-- getConstRoomClassCtx id =
+-- field "eventcolor" (const (getRoomClass id))
+-- roomClassCtx = field "eventcolor" (getRoomClass . itemIdentifier)
+
+-- field "eventcolor" (getRoomClass . itemIdentifier) `mappend`
+
+
+
+-- tocCtx :: Context String
+-- tocCtx
+--     | "toc" `M.member` metadata
+--     | otherwise = missingField
+--     where
+--       metadata <- getMetadata $ itemIdentifier item
 
 archiveCtx posts =
   listField "posts" postCtx (return posts)
@@ -65,7 +143,7 @@ index = do
   match "index.html" $ do
     route idRoute
     compile $ do
-      posts <- recentFirst =<< loadAll "posts/*"
+      posts <- recentFirst =<< loadAll ("posts/*" .&&. hasNoVersion)
       let idxCtx = indexCtx posts
       getResourceBody
         >>= applyAsTemplate idxCtx
@@ -93,12 +171,17 @@ posts = do
         >>= loadAndApplyTemplate "templates/default.html" postCtx
         >>= relativizeUrls
 
+postsToc :: Rules ()
+postsToc = do
+  match "posts/*" $ version "toc" $
+        compile pandocTocCompiler
+
 archive :: Rules ()
 archive = do
   create ["archive.html"] $ do
     route idRoute
     compile $ do
-      posts <- recentFirst =<< loadAll "posts/*"
+      posts <- recentFirst =<< loadAll ("posts/*" .&&. hasNoVersion)
       let archiveCtx' = archiveCtx posts
       makeItem ""
         >>= loadAndApplyTemplate "templates/archive.html" archiveCtx'
@@ -127,7 +210,7 @@ atom = do
          -- let feedCtx = bodyField "description" <> postCtx
          let feedCtx = postCtx
          posts <- fmap (take 20) . recentFirst =<<
-                  loadAllSnapshots "posts/*" "content"
+                  loadAllSnapshots ("posts/*" .&&. hasNoVersion) "content"
          renderAtom feedConfiguration feedCtx posts
 
 --------------------------------------------------------------------
@@ -142,6 +225,15 @@ pandocMathCompiler =
         writerOptions = defaultHakyllWriterOptions {
                           writerExtensions = newExtensions,
                           writerHTMLMathMethod = MathJax ""
+                        }
+    in pandocCompilerWith defaultHakyllReaderOptions writerOptions
+
+-- See http://julien.jhome.fr/posts/2013-05-14-adding-toc-to-posts.html
+pandocTocCompiler =
+    let writerOptions = defaultHakyllWriterOptions {
+                          writerTableOfContents = True
+                        , writerTemplate = "$toc$"
+                        , writerStandalone = True
                         }
     in pandocCompilerWith defaultHakyllReaderOptions writerOptions
 
@@ -173,7 +265,16 @@ main = hakyllWith cfg $ do
   static
   less
   posts
+  -- postsToc
   archive
   templates
   otherPages
   atom
+
+  match "posts/*" $ version "toc" $
+        compile $ pandocCompilerWith defaultHakyllReaderOptions
+                defaultHakyllWriterOptions {
+                          writerTableOfContents = True
+                        , writerTemplate = "$toc$"
+                        , writerStandalone = True
+                        }

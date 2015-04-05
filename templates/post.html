@@ -1,10 +1,18 @@
 <h1>$title$</h1>
 <div class="info">
-    Posted on $date$
-    $if(author)$
-        by $author$
-    $endif$
+  Posted on $date$
+  $if(author)$
+  by $author$
+  $endif$
 </div>
+
+$if(noToc)$ $else$
+<div class="bs-callout bs-callout-toc">
+  <h2 class="contents">Contents</h2>
+  $toc$
+</div>
+$endif$
+
 
 $body$
 

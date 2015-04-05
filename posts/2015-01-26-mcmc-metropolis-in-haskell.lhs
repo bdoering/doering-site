@@ -5,6 +5,7 @@ tags: Haskell, statistics
 extrahead: 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.8/c3.min.css" type="text/css">
 mathjax: on
+noToc: valueDoesNotMatter
 ---
 
 <!-- To compile, set up a cabal sandbox and then, from there, run:
