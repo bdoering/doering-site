@@ -2,3 +2,5 @@
 _cache/
 _site/
 dist/
+.stack-work/
+*~
