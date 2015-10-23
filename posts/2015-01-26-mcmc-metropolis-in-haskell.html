@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Personal webpage and blog">
+    <meta name="author" content="Björn J. Döring">
+    <link rel="icon" href="../favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
+
+    <title>Bayesian Parameter Estimation with Metropolis MCMC in Haskell — Björn Döring</title>
+
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.8/c3.min.css" type="text/css">
+    
+    
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+    <link href="../assets/css/bdoering.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+    
+    <div class="navbar navbar-default navbar-static-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../">BJÖRN DÖRING</a>
+        </div>
+        <div class="collapse navbar-collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="../index.html">Home</a></li>
+            <li><a href="../about.html">About</a></li>
+	    <li><a href="../atom.xml">Feed</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+
+    <div class="container">
+      <h1>Bayesian Parameter Estimation with Metropolis MCMC in Haskell</h1>
+<div class="info">
+  Posted on January 26, 2015
+  
+</div>
+
+ 
+
+
+<!-- To compile, set up a cabal sandbox and then, from there, run:
+  cabal exec runhaskell ~/path/to/file/2015-01-26-mcmc-metropolis-in-haskell.lhs && cp *.json ~/path/to/posts/doering-site/posts/2015-01-26-mcmc-metropolis-in-haskell/
+-->
+<p>When you have some measurement values at hand, you will quite often want to estimate parameters from the data. In principle you now have the choice between frequentist and Bayesian statistics. I believe that Bayesian statistics has many advantages, especially with respect to (<abbr title="synthetic aperture radar">SAR</abbr>) calibration. This is because parameters are regarded as random variables, described by a probability distribution. After estimation, the uncertainty of this estimate is inherently part of the analysis (in form of the width of the probability distribution), which can then be used in a subsequent uncertainty analysis to determine the measurement uncertainty of a measurement result.</p>
+<p>I will leave an introduction to Bayesian data analysis to others<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>, and concentrate here on the implementation of a simple Monte Carlo Markov chain (MCMC), using the <a href="https://en.wikipedia.org/wiki/Metropolis–Hastings_algorithm">Metropolis algorithm</a>. The Metropolis algorithm is maybe the simplest of a range of Markov chain algorithms, and quite instructive to get your feet wet in the field of Bayesian simulation.</p>
+<p>If you want to get serious with <abbr title="Monte Carlo Markov Chain">MCMC</abbr>, then there are many full-fledged, efficient <abbr title="Monte Carlo Markov Chain">MCMC</abbr> packages implemented in various programming languages. I have had good success with <a href="https://pymc-devs.github.io/pymc/">PyMC 2</a> for Python so far (and I am really looking forward to the much improved interface of <a href="https://github.com/pymc-devs/pymc">PyMC 3</a>, which is not yet officially released). The “new kid on the block” seems to be <a href="http://mc-stan.org/">STAN</a>, whose <a href="https://pystan.readthedocs.org/en/latest/getting_started.html">Python interface</a> is also a pleasure to work with.</p>
+<p>But now let’s get started, shall we?</p>
+<h2 id="metropolis-monte-carlo-markov-chain-in-haskell">Metropolis Monte Carlo Markov Chain in Haskell</h2>
+<p>Let’s look at a simple estimation example: linear regression. The idea is that we have measured <span class="math inline">\(N\)</span> samples <span class="math inline">\(y_i\)</span>, <span class="math inline">\(i = 1 \dots N\)</span>, for given <span class="math inline">\(x_i\)</span>. We want to model the data according to <span class="math display">\[y_i = ax_i + b + e_i,\]</span> <span class="math display">\[e \sim \mathrm{N}(0, \sigma^2),\]</span> i. e., we want to fit a line through some noisy data. The unknowns are <span class="math inline">\(a\)</span>, <span class="math inline">\(b\)</span>, and <span class="math inline">\(\sigma\)</span>. Alternatively we could have written <span class="math display">\[y \sim \mathrm{N}(ax + b, \sigma^2).\]</span></p>
+<p>The concrete example we are going to look at is inspired by a <a href="https://theoreticalecology.wordpress.com/2010/09/17/metropolis-hastings-mcmc-in-r/">post</a> on an implementation of the Metropolis algorithm in <a href="http://www.r-project.org/">R</a>. Here I want to implement it using <a href="https://www.haskell.org/">Haskell</a>, not only to practice the language, but also to explore how well this compiled language lends itself to numerical simulations like this. Thanks to <a href="https://idontgetoutmuch.wordpress.com/2014/03/20/bayesian-analysis-a-conjugate-prior-and-markov-chain-monte-carlo/">another blog post</a>, it was a surprisingly pleasant experience.</p>
+<p>By the way, the <a href="https://github.com/bdoering/doering-site/blob/master/posts/2015-01-26-mcmc-metropolis-in-haskell.lhs">source file</a> of this blog post is a <a href="https://www.haskell.org/haskellwiki/Literate_programming">literate Haskell</a> file which can directly be compiled and executed, should you want to try it out for yourself!</p>
+<p>Let’s get started with some imports…</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Control.Monad</span>
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Control.Monad.State</span> (evalState)
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Data.Histogram</span> (asList)
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Data.Histogram.Fill</span>
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Data.Histogram.Generic</span> (<span class="dt">Histogram</span>)
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Data.List</span>
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Data.Random</span>
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Data.Random.Source.PureMT</span>
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Statistics.Distribution</span> <span class="kw">hiding</span> (mean)
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Statistics.Distribution.Normal</span>
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Statistics.Distribution.Uniform</span>
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Text.JSON</span>
+<span class="ot">&gt;</span> <span class="kw">import qualified</span> <span class="dt">Data.Histogram</span> <span class="kw">as</span> <span class="dt">H</span>
+<span class="ot">&gt;</span> <span class="kw">import qualified</span> <span class="dt">Data.Vector.Unboxed</span> <span class="kw">as</span> <span class="dt">V</span></code></pre></div>
+<p>Our model relates the known variable <span class="math inline">\(x\)</span> to an output value <span class="math inline">\(y\)</span>, as long as <span class="math inline">\(a\)</span>, and <span class="math inline">\(b\)</span> are known:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; predict ::</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span><span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span>
+<span class="ot">&gt;</span> predict a b x <span class="fu">=</span> a <span class="fu">*</span> x <span class="fu">+</span> b</code></pre></div>
+<p>Having defined this, we can generate some noisy test data now. Later on we will try to estimate the true values for <span class="math inline">\(a\)</span>, <span class="math inline">\(b\)</span>, and <span class="math inline">\(\sigma\)</span> from this test data.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> trueA, trueB,<span class="ot"> trueSd ::</span> <span class="dt">Double</span>
+<span class="ot">&gt;</span> trueA <span class="fu">=</span> <span class="dv">5</span>
+<span class="ot">&gt;</span> trueB <span class="fu">=</span> <span class="dv">0</span>
+<span class="ot">&gt;</span> trueSd <span class="fu">=</span> <span class="dv">10</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; nSamples ::</span> <span class="dt">Int</span>
+<span class="ot">&gt;</span> nSamples <span class="fu">=</span> <span class="dv">31</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; xs ::</span> [<span class="dt">Double</span>]
+<span class="ot">&gt;</span> xs <span class="fu">=</span> take nSamples <span class="fu">$</span> [<span class="fu">-</span><span class="fl">15.0</span> <span class="fu">..</span>]
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; arbSeed ::</span> <span class="dt">Int</span>
+<span class="ot">&gt;</span> arbSeed <span class="fu">=</span> <span class="dv">4022</span> <span class="co">-- Arbitrary seed for generating random numbers</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; ys ::</span> [<span class="dt">Double</span>]
+<span class="ot">&gt;</span> ys <span class="fu">=</span> zipWith (<span class="fu">+</span>) noise (map (predict trueA trueB) xs)
+<span class="ot">&gt;</span>   <span class="kw">where</span> noise <span class="fu">=</span> evalState (replicateM nSamples (sample (<span class="dt">Normal</span> <span class="fl">0.0</span> trueSd)))
+<span class="ot">&gt;</span>                 (pureMT <span class="fu">$</span> fromIntegral arbSeed)</code></pre></div>
+<p>In order to include plots in this page, I use the <a href="http://c3js.org/">C3.js</a> JavaScript chart library, which can read in <abbr title="JavaScript Object Notation">JSON</abbr> data. So we export the generated test data as a <abbr title="JavaScript Object Notation">JSON</abbr> file:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; exportTestData ::</span> <span class="dt">IO</span> ()
+<span class="ot">&gt;</span> exportTestData <span class="fu">=</span> writeFile <span class="st">&quot;test-data.json&quot;</span> <span class="fu">.</span> encode <span class="fu">.</span> toJSObject <span class="fu">$</span>
+<span class="ot">&gt;</span>                  [(<span class="st">&quot;x&quot;</span>, xs), (<span class="st">&quot;y&quot;</span>, ys)]</code></pre></div>
+<p>This is what our generated test data looks like, <code>ys</code> over <code>xs</code>:</p>
+<p class="text-center">
+Generated noisy test data
+<p>
+<div id="chart_testdata">
+
+</div>
+<p>In order to draw from the posterior, we need to determine the likelihood function and the prior. Let’s start with the likelihood. The record level likelihood is given as <span class="math display">\[ p(y_i|a, b, \sigma, x_i) = \frac{1}{\sqrt{2\pi}\sigma} \exp \left[ -\frac{(y_i-(ax_i + b))^2}{2\sigma^2} \right], \]</span> i. e., the probability of sample <span class="math inline">\(y_i\)</span> under a normal distribution with mean <span class="math inline">\(a x_i + b\)</span> and variance <span class="math inline">\(\sigma^2\)</span>. Each sample <span class="math inline">\(y_i\)</span> is assumed to be drawn independently, so the model-level likelihood for the complete sample <span class="math inline">\(y\)</span> is the product of the separate likelihoods, or <span class="math display">\[ p(y|a, b, \sigma, x) = \prod_{i=1}^N \frac{1}{\sqrt{2\pi}\sigma} \exp \left[-\frac{(y_i-(ax_i + b))^2}{2\sigma^2} \right]. \]</span></p>
+<p>In numerical implementations one usually does not compute the likelihood, but the log-likelihood in order to avoid problems with small numbers: <span class="math display">\[  \log [p(y|a, b, \sigma, x)] = \sum_{i=1}^N \frac{1}{2\sigma} \exp \left[ -\frac{(y_i-(ax_i + b))^2}{2\sigma^2} \right]. \]</span> The location of the maximum of the log-likelihood function remains unchanged.</p>
+<p>In Haskell the log-likelihood is:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; loglikelihood ::</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span>
+<span class="ot">&gt;</span> loglikelihood a b sd <span class="fu">=</span> sum <span class="fu">$</span> zipWith lh xs ys
+<span class="ot">&gt;</span>   <span class="kw">where</span> lh x <span class="fu">=</span> logDensity (normalDistr (predict a b x) sd)</code></pre></div>
+<p>As an example, we can plot the log-likelihood <span class="math inline">\(p(y|a, b=0, \sigma=10, x)\)</span>, showing how likely the samples <span class="math inline">\((x_i, y_i)\)</span>, <span class="math inline">\(i=1 \dots N\)</span>, are for varying <span class="math inline">\(a\)</span>, a fixed <span class="math inline">\(b=0\)</span>, and a fixed <span class="math inline">\(\sigma=10\)</span> (again by exporting the data to a <abbr title="JavaScript Object Notation">JSON</abbr> file first):</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; exportLikelihoodA ::</span> <span class="dt">IO</span> ()
+<span class="ot">&gt;</span> exportLikelihoodA <span class="fu">=</span> writeFile <span class="st">&quot;log-likelihood.json&quot;</span> <span class="fu">.</span> encode <span class="fu">.</span> toJSObject <span class="fu">$</span>
+<span class="ot">&gt;</span>                     (\as <span class="ot">-&gt;</span> [ (<span class="st">&quot;x&quot;</span>, as),
+<span class="ot">&gt;</span>                              (<span class="st">&quot;loglikelihood&quot;</span>, map (\a <span class="ot">-&gt;</span> loglikelihood a trueB trueSd) as )])
+<span class="ot">&gt;</span>                     [<span class="dv">3</span>, <span class="fl">3.05</span> <span class="fu">..</span> <span class="dv">7</span><span class="ot">::</span><span class="dt">Double</span>]</code></pre></div>
+<p class="text-center">
+Log-likelihood <span class="math inline">\(p(y|a, b=0, \sigma=10, x)\)</span>
+</p>
+<div id="chart_loglikelihood">
+
+</div>
+<p>We can see that <span class="math inline">\(a=5\)</span> is very close to the maximum. The remaining offset is a result of the random nature of our test samples <span class="math inline">\((x_i, y_i)\)</span>.</p>
+<p>As for any Bayesian data analysis, we also need a prior. Here we choose rather uninformative priors which have little influence on the estimated parameters:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; logprior ::</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span>
+<span class="ot">&gt;</span> logprior a b sd <span class="fu">=</span> sum [ap, bp, sdp]
+<span class="ot">&gt;</span>   <span class="kw">where</span>
+<span class="ot">&gt;</span>     ap  <span class="fu">=</span> logDensity (uniformDistr <span class="dv">0</span> <span class="dv">10</span>) a
+<span class="ot">&gt;</span>     bp  <span class="fu">=</span> logDensity (normalDistr <span class="dv">0</span> <span class="dv">5</span>) b
+<span class="ot">&gt;</span>     sdp <span class="fu">=</span> logDensity (uniformDistr <span class="dv">0</span> <span class="dv">30</span>) sd</code></pre></div>
+<p>The (unscaled) log-posterior is now given as the sum of the log-likelihood and the log-prior:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; logposterior ::</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span>
+<span class="ot">&gt;</span> logposterior a b sd <span class="fu">=</span> loglikelihood a b sd <span class="fu">+</span> logprior a b sd</code></pre></div>
+<p>Now we can start to actually implement the Metropolis <abbr title="Monte Carlo Markov Chain">MCMC</abbr>. The Metropolis algorithm is a random walk algorithm. Each of the</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; nIters ::</span> <span class="dt">Int</span>
+<span class="ot">&gt;</span> nIters <span class="fu">=</span> <span class="dv">100000</span></code></pre></div>
+<p>steps in the random walk only depends on the current state (location in the parameter space) and an acceptance/rejection criterion (which involves random numbers). To go from the current location <span class="math inline">\((a, b, \sigma)\)</span> to a proposed location <span class="math inline">\((a + \Delta a, b + \Delta b, \sigma + \Delta\sigma)\)</span>, we need to generate random delta values with zero mean. Let’s define a general function for generating a list of random values from a seed:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; normalisedProposals ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> [<span class="dt">Double</span>]
+<span class="ot">&gt;</span> normalisedProposals seed sigma nIters <span class="fu">=</span>
+<span class="ot">&gt;</span>   evalState (replicateM nIters (sample (<span class="dt">Normal</span> <span class="fl">0.0</span> sigma)))
+<span class="ot">&gt;</span>   (pureMT <span class="fu">$</span> fromIntegral seed)</code></pre></div>
+<p>At each step, the Metropolis algorithm needs to decide if the proposed jump is accepted, for which random draws from a standard uniform distribution are required:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; acceptOrRejects ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> [<span class="dt">Double</span>]
+<span class="ot">&gt;</span> acceptOrRejects seed nIters <span class="fu">=</span>
+<span class="ot">&gt;</span>   evalState (replicateM nIters (sample stdUniform))
+<span class="ot">&gt;</span>   (pureMT <span class="fu">$</span> fromIntegral seed)</code></pre></div>
+<p>The acceptance probability for accepting the new location over the old location is then:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; acceptanceProb ::</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="co">-- ^ Proposal parameters</span>
+<span class="ot">&gt;</span>                <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="co">-- ^ Old parameters </span>
+<span class="ot">&gt;</span>                <span class="ot">-&gt;</span> <span class="dt">Double</span>
+<span class="ot">&gt;</span> acceptanceProb a' b' sd' a b sd <span class="fu">=</span>
+<span class="ot">&gt;</span>     exp ((logposterior a' b' sd') <span class="fu">-</span> (logposterior a b sd))</code></pre></div>
+<p>The core of the Metropolis algorithm is the following. We either advance to the proposed location or stay at the current location, depending on the acceptance probability:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; oneStep ::</span> (<span class="dt">Double</span>, <span class="dt">Double</span>, <span class="dt">Double</span>, <span class="dt">Int</span>)    <span class="co">-- ^ Current location</span>
+<span class="ot">&gt;</span>         <span class="ot">-&gt;</span> (<span class="dt">Double</span>, <span class="dt">Double</span>, <span class="dt">Double</span>, <span class="dt">Double</span>) <span class="co">-- ^ Delta location and acceptance probability</span>
+<span class="ot">&gt;</span>         <span class="ot">-&gt;</span> (<span class="dt">Double</span>, <span class="dt">Double</span>, <span class="dt">Double</span>, <span class="dt">Int</span>)    <span class="co">-- ^ New state</span>
+<span class="ot">&gt;</span> oneStep (a, b, sd, nAccs) (da, db, dsd, acceptOrReject) <span class="fu">=</span>
+<span class="ot">&gt;</span>   <span class="kw">if</span> acceptOrReject <span class="fu">&lt;</span> acceptanceProb (a <span class="fu">+</span> da) (b <span class="fu">+</span> db) (sd <span class="fu">+</span> dsd) a b sd
+<span class="ot">&gt;</span>   <span class="kw">then</span> (a <span class="fu">+</span> da, b <span class="fu">+</span> db, sd <span class="fu">+</span> dsd, nAccs <span class="fu">+</span> <span class="dv">1</span>)
+<span class="ot">&gt;</span>   <span class="kw">else</span> (a, b, sd, nAccs)</code></pre></div>
+<p>The complete Markov <code>chain</code> can be generated from a starting location and a succession of single steps:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> startA, startB,<span class="ot"> startSd ::</span> <span class="dt">Double</span>
+<span class="ot">&gt;</span> startA <span class="fu">=</span> <span class="dv">4</span>  <span class="co">-- ^ All start values are a little off</span>
+<span class="ot">&gt;</span> startB <span class="fu">=</span> <span class="dv">1</span>  <span class="co">--   to show that the algorithm converges</span>
+<span class="ot">&gt;</span> startSd <span class="fu">=</span> <span class="dv">9</span> <span class="co">--   to the true posterior after burn in</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; burnIn ::</span> <span class="dt">Int</span>
+<span class="ot">&gt;</span> burnIn <span class="fu">=</span> <span class="dv">1000</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; chain ::</span> <span class="dt">Int</span>        <span class="co">-- ^ Seed for generation of random numbers</span>
+<span class="ot">&gt;</span>       <span class="ot">-&gt;</span> [ ( <span class="dt">Double</span> <span class="co">-- ^ a</span>
+<span class="ot">&gt;</span>            , <span class="dt">Double</span> <span class="co">-- ^ b</span>
+<span class="ot">&gt;</span>            , <span class="dt">Double</span> <span class="co">-- ^ sigma</span>
+<span class="ot">&gt;</span>            , <span class="dt">Int</span>    <span class="co">-- ^ number of accepted samples</span>
+<span class="ot">&gt;</span>            ) ]
+<span class="ot">&gt;</span> chain seed <span class="fu">=</span>
+<span class="ot">&gt;</span>   drop burnIn <span class="fu">$</span>
+<span class="ot">&gt;</span>   scanl oneStep (startA, startB, startSd, <span class="dv">0</span>) <span class="fu">$</span>
+<span class="ot">&gt;</span>   zip4 (normalisedProposals seed <span class="fl">0.3</span> nIters)    
+<span class="ot">&gt;</span>     (normalisedProposals (seed<span class="fu">+</span><span class="dv">999</span>) <span class="fl">1.5</span> nIters) 
+<span class="ot">&gt;</span>     (normalisedProposals (seed<span class="fu">+</span><span class="dv">1</span>) <span class="fl">2.0</span> nIters )  
+<span class="ot">&gt;</span>     (acceptOrRejects (seed<span class="fu">+</span><span class="dv">2</span>) nIters)</code></pre></div>
+<p>The promise of the trace data is that it was drawn from the posterior distribution. So by looking at the trace of each parameter, we can directly derive quantities of interest (like an estimate of the expected value, and an estimate of the variance of this expected value). Here I want to generate a histogram from the trace data and export it as a <abbr title="JavaScript Object Notation">JSON</abbr> file for plotting. Additionally I want to export the last 1000 samples of the trace data to get a visual clue if consecutive samples are sufficiently uncorrelated.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; hb ::</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span>
+<span class="ot">&gt;</span>    <span class="ot">-&gt;</span> <span class="dt">HBuilder</span> <span class="dt">Double</span> (<span class="dt">Data.Histogram.Generic.Histogram</span> <span class="dt">V.Vector</span> <span class="dt">H.BinD</span> <span class="dt">Double</span>)
+<span class="ot">&gt;</span> hb lower upper <span class="fu">=</span> forceDouble <span class="fu">-&lt;&lt;</span> mkSimple (H.binD lower numBins upper)
+<span class="ot">&gt;</span>     <span class="kw">where</span> numBins <span class="fu">=</span> <span class="dv">121</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="co">-- | Export trace data to JSON file (histogram and last 1000 samples)</span>
+<span class="ot">&gt; exportTrace ::</span> <span class="dt">V.Vector</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">IO</span> ()
+<span class="ot">&gt;</span> exportTrace trace name lower upper <span class="fu">=</span> <span class="kw">do</span>
+<span class="ot">&gt;</span>   <span class="kw">let</span> hist <span class="fu">=</span> fillBuilderVec (hb lower upper) trace
+<span class="ot">&gt;</span>   write <span class="st">&quot;histogram&quot;</span> <span class="fu">$</span> [ (<span class="st">&quot;x&quot;</span>, V.toList <span class="fu">$</span> H.binsCenters (H.bins hist))
+<span class="ot">&gt;</span>                       , (<span class="st">&quot;y&quot;</span>, V.toList (H.histData hist)) ]
+<span class="ot">&gt;</span>   write <span class="st">&quot;trace&quot;</span>     <span class="fu">$</span> [(<span class="st">&quot;data&quot;</span>, V.toList <span class="fu">.</span> V.drop (V.length trace <span class="fu">-</span> <span class="dv">1000</span>) <span class="fu">$</span> trace)]
+<span class="ot">&gt;</span>       <span class="kw">where</span> write x <span class="fu">=</span> writeFile (concat [ x, name, <span class="st">&quot;.json&quot;</span>]) <span class="fu">.</span> encode <span class="fu">.</span> toJSObject
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; consumeResults ::</span> ( [<span class="dt">Double</span>], [<span class="dt">Double</span>], [<span class="dt">Double</span>], [<span class="dt">Int</span>] ) <span class="ot">-&gt;</span> <span class="dt">IO</span> ()
+<span class="ot">&gt;</span> consumeResults (traceA, traceB, traceSd, lAcc) <span class="fu">=</span> <span class="kw">do</span>
+<span class="ot">&gt;</span>   exportTrace (V.fromList traceA)  <span class="st">&quot;A&quot;</span> <span class="dv">3</span> <span class="dv">7</span>
+<span class="ot">&gt;</span>   exportTrace (V.fromList traceB)  <span class="st">&quot;B&quot;</span> (<span class="fu">-</span><span class="dv">6</span>) <span class="dv">6</span>
+<span class="ot">&gt;</span>   exportTrace (V.fromList traceSd) <span class="st">&quot;Sd&quot;</span> <span class="dv">0</span> <span class="dv">20</span>
+<span class="ot">&gt;</span>   <span class="kw">let</span> nAccepts <span class="fu">=</span> last lAcc
+<span class="ot">&gt;</span>   putStrLn <span class="fu">$</span> concat [ <span class="st">&quot;nIter: &quot;</span>
+<span class="ot">&gt;</span>                     , show nIters
+<span class="ot">&gt;</span>                     , <span class="st">&quot;  accepts: &quot;</span>
+<span class="ot">&gt;</span>                     , show nAccepts
+<span class="ot">&gt;</span>                     , <span class="st">&quot;  ratio: &quot;</span>
+<span class="ot">&gt;</span>                     , show (fromIntegral nAccepts <span class="fu">/</span> fromIntegral nIters)
+<span class="ot">&gt;</span>                     ] 
+<span class="ot">&gt;</span> main <span class="fu">=</span> <span class="kw">do</span>
+<span class="ot">&gt;</span>   exportTestData
+<span class="ot">&gt;</span>   exportLikelihoodA
+<span class="ot">&gt;</span>   consumeResults <span class="fu">.</span> unzip4 <span class="fu">.</span> chain <span class="fu">$</span> arbSeed
+<span class="ot">&gt;</span>   return ()        </code></pre></div>
+<p>And here is a histogram and trace of <span class="math inline">\(a\)</span>:</p>
+<div class="row">
+<div class="col-sm-6">
+<p class="text-center">
+Histogram of <span class="math inline">\(a\)</span>
+</p>
+<div id="chart_histogramA">
+
+</div>
+</div>
+<div class="col-sm-6">
+<p class="text-center">
+Last 1000 values of trace of <span class="math inline">\(a\)</span>
+</p>
+<div id="chart_traceA">
+
+</div>
+</div>
+</div>
+<p>The histogram (an approximation of the probability density function of the parameter <span class="math inline">\(a\)</span>) nicely summarizes the estimation result. As a measure of uncertainty, one often considers the 95 % highest probability density interval (HPDI), but for this demo the analysis shall stop here.</p>
+<p>If you look at the trace, you can see that sometimes it remains at the same location for a few draws, and sometimes a new location is accepted right away. This acceptance rate is an important parameter when adjusting the variance of the jumps (the second parameter of our <code>normalisedProposals</code> function). If the variance is too small, then the acceptance ratio will be close to 1.0, but the location will change very slowly so that many random draws are required until the trace had the chance to sufficiently explore the parameter space. On the other hand, if the variance is too large then hardly any new location will be accepted and the trace appears to be stuck. It is difficult to get the variance of the jump proposals right in the general case (and this the reason why so many libraries exist which implement <abbr title="Monte Carlo Markov Chains">MCMCs</abbr>). Here I just tuned the values manually until the acceptance ratio was around 0.4.</p>
+<p>For completeness, here are the histograms and parts of the traces for the parameters <span class="math inline">\(b\)</span> and <span class="math inline">\(\sigma\)</span>:</p>
+<div class="row">
+<div class="col-sm-6">
+<p class="text-center">
+Histogram of <span class="math inline">\(b\)</span>
+</p>
+<div id="chart_histogramB">
+
+</div>
+</div>
+<div class="col-sm-6">
+<p class="text-center">
+Last 1000 values of trace of <span class="math inline">\(b\)</span>
+</p>
+<div id="chart_traceB">
+
+</div>
+</div>
+</div>
+<div class="row">
+<div class="col-sm-6">
+<p class="text-center">
+Histogram of <span class="math inline">\(\sigma\)</span>
+</p>
+<div id="chart_histogramSd">
+
+</div>
+</div>
+<div class="col-sm-6">
+<p class="text-center">
+Last 1000 values of trace of <span class="math inline">\(\sigma\)</span>
+</p>
+<div id="chart_traceSd">
+
+</div>
+</div>
+</div>
+<h1 id="conclusion">Conclusion</h1>
+<p>Implementing the Metropolis <abbr title="Monte Carlo Markov Chain">MCMC</abbr> algorithm in Haskell was a good learning experience, both from the point of view of Bayesian data analysis and for programming in Haskell.</p>
+<p>An interesting next step would be to look at more complex statistical models, considering hierarchical or pooled data. This is an area where Bayesian data analysis should excel over many Frequentist approaches because Bayesian models are easier to adapt to more complex situations. Solving these models in practice is then relatively easy thanks to the availability of random walk algorithms like the Metropolis sampler, especially when existing <abbr title="Monte Carlo Markov Chain">MCMC</abbr> libraries are used.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js" charset="utf-8"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.9/c3.min.js"></script>
+<script>
+var chart_testdata = c3.generate({
+    bindto: '#chart_testdata',
+    data: {
+        x: 'x',
+        url: '2015-01-26-mcmc-metropolis-in-haskell/test-data.json',
+        mimeType: 'json',
+        type: 'scatter',
+        colors: {
+            'y': '#428BCA',
+        },
+    },
+    legend: {
+        show: false
+    },
+    point: {
+        r: 5
+    },
+    axis: {
+        x: {label: 'x'},
+        y: {label: 'y'},
+    }
+});
+
+var chart_loglikelihood = c3.generate({
+    bindto: '#chart_loglikelihood',
+    data: {
+        x: 'x',
+        url: '2015-01-26-mcmc-metropolis-in-haskell/log-likelihood.json',
+        mimeType: 'json',
+        colors: {
+            'y': '#428BCA',
+        },
+    },
+    legend: {
+        show: false
+    },
+    point: {
+        show: false
+    },
+    axis: {
+        x: {
+            label: 'a',
+            tick: {
+                values: [3,4,5,6,7],
+            },
+        },
+        y: {label: 'log(likelihood)'},
+    },
+    grid: {
+        x: {
+            lines: [{value: 5, text: 'true A'}]
+        },
+    },
+});
+
+function trace(name, trueVal) {
+var chart_traceA = c3.generate({
+    bindto: '#chart_trace' + name,
+    size: { height: 250 },
+    data: {
+        url: '2015-01-26-mcmc-metropolis-in-haskell/trace' + name + '.json',
+        mimeType: 'json',
+        colors: {
+            'data': '#428BCA',
+        },
+    },
+    legend: {
+        show: false
+    },
+    point: {
+        show: false
+    },
+    axis: {
+        x: {
+            label: 'Iteration',
+            tick: {
+                values: [0, 500, 1000],
+            },
+        },
+        y: {label: 'Trace of ' + name},
+    },
+    grid: {
+        y: {
+            lines: [{value: trueVal, text: 'true ' + name}]
+        },
+    },
+});
+};
+
+function histogram(name, trueVal, xticks) {
+var chart_histogram = c3.generate({
+    bindto: '#chart_histogram' + name,
+    size: { height: 250 },
+    data: {
+        x: 'x',
+        url: '2015-01-26-mcmc-metropolis-in-haskell/histogram' + name + '.json',
+        mimeType: 'json',
+        type: 'bar',
+        colors: {
+            'data': '#428BCA',
+        },
+    },
+    legend: {
+        show: false
+    },
+    axis: {
+        x: {
+            label: 'x',
+            tick: {
+                values: xticks,
+            },
+        },
+        y: {label: 'Count'},
+    },
+    grid: {
+        x: {
+            lines: [{value: trueVal, text: 'true ' + name}]
+        },
+    },
+    bar: {  
+        width: {
+            ratio: 1.1
+        },
+    },
+});
+};
+
+histogram('A', 5, [3,4,5,6,7]);
+histogram('B', 0, [-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6]);
+histogram('Sd', 10, [0,5,10,15,20]);
+trace('A', 5);
+trace('B', 0);
+trace('Sd', 10);
+
+</script>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Andrew Gelman, John B. Carlin, Hal S. Stern: <em>Bayesian Data Analysis</em>, 3rd ed. CRC Press 2013.<a href="#fnref1">↩</a></p></li>
+</ol>
+</div>
+
+<p class="text-center disqus-btn">
+  <button id="btn-interact" data-toggle="button" type="button" class="btn btn-default btn-bw">
+    <span class="glyphicon glyphicon-hand-down"></span>
+    Interact!
+  </button>
+</p>
+
+<div id="interact" class="hidden">
+  <!-- Flattr button -->
+  <script id="fb0cg6l">(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=bdoering&button=compact&url='+encodeURIComponent(document.URL);f.title='Flattr';f.height=20;f.width=110;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('fb0cg6l');</script>
+  
+  
+  <!-- Disqus comments -->
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+    var disqus_shortname = 'bdoering'; // required: replace example with your forum shortname
+    (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div> <!-- interact -->
+
+    </div><!-- /.container -->
+
+    <div class="footer">
+      <div class="container">
+	<p class="text-right">Site proudly generated by <a href="http://jaspervdj.be/hakyll/">Hakyll</a>!</p>
+      </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../assets/js/ie10-viewport-bug-workaround.js"></script>
+
+    <script src="../assets/js/post-interact.js"></script>
+
+
+  </body>
+</html>
+

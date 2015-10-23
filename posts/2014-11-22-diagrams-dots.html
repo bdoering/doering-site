@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Personal webpage and blog">
+    <meta name="author" content="Björn J. Döring">
+    <link rel="icon" href="../favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
+
+    <title>Drawing Random Dots with Haskell — Björn Döring</title>
+
+    
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css"> <link rel="stylesheet" href="//blueimp.github.io/Gallery/css/blueimp-gallery.min.css"> <link rel="stylesheet" href="../assets/css/bootstrap-image-gallery.min.css">
+    
+    
+    
+    
+
+    <link href="../assets/css/bdoering.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+    
+    <div class="navbar navbar-default navbar-static-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../">BJÖRN DÖRING</a>
+        </div>
+        <div class="collapse navbar-collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="../index.html">Home</a></li>
+            <li><a href="../about.html">About</a></li>
+	    <li><a href="../atom.xml">Feed</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+
+    <div class="container">
+      <h1>Drawing Random Dots with Haskell</h1>
+<div class="info">
+  Posted on November 22, 2014
+  
+</div>
+
+ 
+
+
+<p>My wife and I are in the process of creating a digital photo album, and to keep true to our wedding theme, we need dots, many colorful random dots as a background. Each page should look similar, but not identical, and dots should not be overlapping.</p>
+<p>I guess I have been thinking too much about random numbers and distributions lately … “If the only tool you have is a hammer, you tend to see every problem as a nail.”</p>
+<p>Well, random dots. I could do this by hand (which is not a very enlightening task, especially if we want to do about 100 photo pages), or find a little algorithm that does it for me. So below you can find my approach at generating random dots, where bigger dots are concentrated in the center.</p>
+<p>I used <a href="https://haskell.org">Haskell</a> and the fascinating <a href="http://projects.haskell.org/diagrams/">Diagrams</a> package, also as a way to explore a library that can directly generate <abbr title="scalable vector graphics">SVG</abbr> files. In fact, this page is actually <a href="https://www.haskell.org/haskellwiki/Literate_programming">literate Haskell</a>, so you might copy/pase the text for instance to <code>dots.lhs</code> and generate your own dots with</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">runhaskell</span> dots.lhs -o dots.svg -w 800</code></pre></div>
+<p>Each time you run the code, a different output is generated. Here are some examples:</p>
+<!-- Image gallery: https://github.com/blueimp/Bootstrap-image-Gallery -->
+<div id="links">
+<p><a href="2014-11-22-diagrams-dots/dots1.png" title="Dots 1" data-gallery> <img src="2014-11-22-diagrams-dots/thumbs/dots1.png" alt="Dots 1"> </a> <a href="2014-11-22-diagrams-dots/dots2.png" title="Dots 2" data-gallery> <img src="2014-11-22-diagrams-dots/thumbs/dots2.png" alt="Dots 2"> </a> <a href="2014-11-22-diagrams-dots/dots3.png" title="Dots 3" data-gallery> <img src="2014-11-22-diagrams-dots/thumbs/dots3.png" alt="Dots 3"> </a> <a href="2014-11-22-diagrams-dots/dots4.png" title="Dots 4" data-gallery> <img src="2014-11-22-diagrams-dots/thumbs/dots4.png" alt="Dots 4"> </a> <a href="2014-11-22-diagrams-dots/dots5.png" title="Dots 5" data-gallery> <img src="2014-11-22-diagrams-dots/thumbs/dots5.png" alt="Dots 5"> </a> <a href="2014-11-22-diagrams-dots/dots6.png" title="Dots 6" data-gallery> <img src="2014-11-22-diagrams-dots/thumbs/dots6.png" alt="Dots 6"> </a> <a href="2014-11-22-diagrams-dots/dots7.png" title="Dots 7" data-gallery> <img src="2014-11-22-diagrams-dots/thumbs/dots7.png" alt="Dots 7"> </a> <a href="2014-11-22-diagrams-dots/dots8.png" title="Dots 8" data-gallery> <img src="2014-11-22-diagrams-dots/thumbs/dots8.png" alt="Dots 8"> </a> <a href="2014-11-22-diagrams-dots/dots9.png" title="Dots 9" data-gallery> <img src="2014-11-22-diagrams-dots/thumbs/dots9.png" alt="Dots 9"> </a> <a href="2014-11-22-diagrams-dots/dots10.png" title="Dots 10" data-gallery> <img src="2014-11-22-diagrams-dots/thumbs/dots10.png" alt="Dots 10"> </a></p>
+</div>
+<h2 id="the-actual-code">The Actual Code!</h2>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">module</span> <span class="dt">Main</span> (main) <span class="kw">where</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Data.Colour.SRGB</span>
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Data.Random.Source</span>
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Diagrams.Backend.SVG.CmdLine</span>
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Diagrams.Prelude</span>
+<span class="ot">&gt;</span> <span class="kw">import qualified</span> <span class="dt">Data.Random</span> <span class="kw">as</span> <span class="dt">R</span></code></pre></div>
+<p>Each dot is defined by a coordinate, a size, and a color.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Dot</span> <span class="fu">=</span> <span class="dt">Dot</span> { _<span class="ot">dotCenter ::</span> <span class="dt">R2</span>
+<span class="ot">&gt;</span>                , _<span class="ot">radius ::</span> <span class="dt">Double</span>
+<span class="ot">&gt;</span>                , _<span class="ot">color ::</span> <span class="dt">Colour</span> <span class="dt">Double</span> 
+<span class="ot">&gt;</span>                } <span class="kw">deriving</span> <span class="dt">Show</span></code></pre></div>
+<p>Let’s allow only certain colors from which we can choose.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; colors ::</span> [<span class="dt">Colour</span> <span class="dt">Double</span>]
+<span class="ot">&gt;</span> colors <span class="fu">=</span> map sRGB24read [
+<span class="ot">&gt;</span>           <span class="st">&quot;bf3131&quot;</span>,
+<span class="ot">&gt;</span>           <span class="st">&quot;f5b456&quot;</span>,
+<span class="ot">&gt;</span>           <span class="st">&quot;a89178&quot;</span>,
+<span class="ot">&gt;</span>           <span class="st">&quot;615b5b&quot;</span>,
+<span class="ot">&gt;</span>           <span class="st">&quot;add274&quot;</span>,
+<span class="ot">&gt;</span>           <span class="st">&quot;b9a1b9&quot;</span>,
+<span class="ot">&gt;</span>           <span class="st">&quot;f0a2bc&quot;</span>,
+<span class="ot">&gt;</span>           <span class="st">&quot;eb565c&quot;</span>,
+<span class="ot">&gt;</span>           <span class="st">&quot;d15f69&quot;</span>,
+<span class="ot">&gt;</span>           <span class="st">&quot;48bdbe&quot;</span>,
+<span class="ot">&gt;</span>           <span class="st">&quot;f1ede2&quot;</span>]</code></pre></div>
+<p><code>randomDot</code> generates a single dot with a random location, radius, and color. The location and the radius are drawn from a normal distribution whose standard distribution is influenced by the <code>x</code> argument. A large <code>x</code> results in, on average, small radii and a small location spread. Therefore, large dots are more likely at the origin (0,0).</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; randomDot ::</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">R.RVar</span> <span class="dt">Dot</span>
+<span class="ot">&gt;</span> randomDot x <span class="fu">=</span> <span class="kw">do</span>
+<span class="ot">&gt;</span>   <span class="kw">let</span> mu_rad <span class="fu">=</span> <span class="dv">15</span> <span class="fu">*</span> exp (<span class="fu">-</span><span class="dv">4</span> <span class="fu">*</span> x)
+<span class="ot">&gt;</span>       sigmaSq_rad <span class="fu">=</span> <span class="fl">0.3</span> <span class="fu">*</span> mu_rad
+<span class="ot">&gt;</span>       sigmaSq_loc <span class="fu">=</span> <span class="dv">8</span> <span class="fu">*</span> exp (<span class="fl">2.5</span><span class="fu">*</span>x)
+<span class="ot">&gt;</span>   locX <span class="ot">&lt;-</span> R.sample (R.normal <span class="dv">0</span> sigmaSq_loc)
+<span class="ot">&gt;</span>   locY <span class="ot">&lt;-</span> R.sample (R.normal <span class="dv">0</span> sigmaSq_loc)
+<span class="ot">&gt;</span>   radius <span class="ot">&lt;-</span> abs <span class="fu">&lt;$&gt;</span> R.sample (R.normal mu_rad sigmaSq_rad)
+<span class="ot">&gt;</span>   color <span class="ot">&lt;-</span> R.sample (R.randomElement colors)
+<span class="ot">&gt;</span>   return <span class="fu">$</span> <span class="dt">Dot</span> (r2 (locX, locY)) radius color</code></pre></div>
+<p>To get non-overlapping dots I do some trial and error: Generate a dot and compare with all previously generated dots. Only keep the new dot if it is not too close to any previously generated dots. This approach is not very efficient, but for 100 dots its just fine.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; randomDots ::</span> [<span class="dt">Dot</span>] <span class="ot">-&gt;</span> [<span class="dt">Double</span>] <span class="ot">-&gt;</span> <span class="dt">IO</span> [<span class="dt">Dot</span>]
+<span class="ot">&gt;</span> randomDots dots [] <span class="fu">=</span> return dots
+<span class="ot">&gt;</span> randomDots dots (x<span class="fu">:</span>xs) <span class="fu">=</span> <span class="kw">do</span>
+<span class="ot">&gt;</span>   dot <span class="ot">&lt;-</span> R.sample <span class="fu">$</span> randomDot x
+<span class="ot">&gt;</span>   <span class="kw">if</span> any (tooClose dot) dots
+<span class="ot">&gt;</span>   <span class="kw">then</span> randomDots dots (x<span class="fu">:</span>xs)
+<span class="ot">&gt;</span>   <span class="kw">else</span> randomDots (dot<span class="fu">:</span>dots) xs</code></pre></div>
+<p>The dots should not overlap. Actually, they should be separated a little, therefore the factor <code>1.1</code>.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; tooClose ::</span> <span class="dt">Dot</span> <span class="ot">-&gt;</span> <span class="dt">Dot</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+<span class="ot">&gt;</span> tooClose x y <span class="fu">=</span> dist <span class="fu">&lt;</span> <span class="fl">1.1</span> <span class="fu">*</span> radiusSum
+<span class="ot">&gt;</span>     <span class="kw">where</span>
+<span class="ot">&gt;</span>       dist <span class="fu">=</span> magnitude <span class="fu">$</span> _dotCenter x <span class="fu">^-^</span> _dotCenter y
+<span class="ot">&gt;</span>       radiusSum <span class="fu">=</span> _radius x <span class="fu">+</span> _radius y</code></pre></div>
+<p>Now the dots need to be converted to a diagram.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; fromDot ::</span> <span class="dt">Dot</span> <span class="ot">-&gt;</span> <span class="dt">Diagram</span> <span class="dt">B</span> <span class="dt">R2</span>
+<span class="ot">&gt;</span> fromDot c <span class="fu">=</span> circle (_radius c) <span class="fu">#</span> fc (_color c)
+<span class="ot">&gt;</span>                                <span class="fu">#</span> lw none
+<span class="ot">&gt;</span>                                <span class="fu">#</span> translate (_dotCenter c)
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; dotsToDiagram ::</span> [<span class="dt">Dot</span>] <span class="ot">-&gt;</span> <span class="dt">Diagram</span> <span class="dt">B</span> <span class="dt">R2</span>
+<span class="ot">&gt;</span> dotsToDiagram <span class="fu">=</span> mconcat <span class="fu">.</span> map fromDot</code></pre></div>
+<p>Command-line arguments are already implemented by the <code>Diagrams</code> package. Nice!</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; main ::</span> <span class="dt">IO</span> ()
+<span class="ot">&gt;</span> main <span class="fu">=</span> mainWith <span class="fu">.</span> dotsToDiagram <span class="fu">=&lt;&lt;</span> randomDots [] [<span class="fl">0.01</span>, <span class="fl">0.02</span><span class="fu">..</span><span class="fl">1.0</span>]</code></pre></div>
+<p>And we are done …</p>
+<!-- The Bootstrap Image Gallery lightbox, should be a child element of the document body -->
+<div id="blueimp-gallery" class="blueimp-gallery" data-use-bootstrap-modal="false">
+<!-- The container for the modal slides -->
+<div class="slides">
+
+</div>
+<!-- Controls for the borderless lightbox -->
+<h3 class="title">
+</h3>
+<a class="prev">‹</a> <a class="next">›</a> <a class="close">×</a> <a class="play-pause"></a>
+<ol class="indicator">
+</ol>
+<!-- The modal dialog, which will be used to wrap the lightbox content -->
+<div class="modal fade">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<button type="button" class="close" aria-hidden="true">
+×
+</button>
+<h4 class="modal-title">
+</h4>
+</div>
+<div class="modal-body next">
+
+</div>
+<div class="modal-footer">
+<button type="button" class="btn btn-default pull-left prev">
+<i class="glyphicon glyphicon-chevron-left"></i> Previous
+</button>
+<button type="button" class="btn btn-primary next">
+Next <i class="glyphicon glyphicon-chevron-right"></i>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="//blueimp.github.io/Gallery/js/jquery.blueimp-gallery.min.js"></script>
+<script src="../assets/js/bootstrap-image-gallery.min.js"></script>
+
+<p class="text-center disqus-btn">
+  <button id="btn-interact" data-toggle="button" type="button" class="btn btn-default btn-bw">
+    <span class="glyphicon glyphicon-hand-down"></span>
+    Interact!
+  </button>
+</p>
+
+<div id="interact" class="hidden">
+  <!-- Flattr button -->
+  <script id="fb0cg6l">(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=bdoering&button=compact&url='+encodeURIComponent(document.URL);f.title='Flattr';f.height=20;f.width=110;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('fb0cg6l');</script>
+  
+  
+  <!-- Disqus comments -->
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+    var disqus_shortname = 'bdoering'; // required: replace example with your forum shortname
+    (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div> <!-- interact -->
+
+    </div><!-- /.container -->
+
+    <div class="footer">
+      <div class="container">
+	<p class="text-right">Site proudly generated by <a href="http://jaspervdj.be/hakyll/">Hakyll</a>!</p>
+      </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../assets/js/ie10-viewport-bug-workaround.js"></script>
+
+    <script src="../assets/js/post-interact.js"></script>
+
+
+  </body>
+</html>
+

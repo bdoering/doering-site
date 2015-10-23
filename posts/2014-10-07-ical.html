@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="author" content>
+    <link rel="icon" href="../favicon.ico">
+
+    <title>Internal Calibration – Or is it? — Björn Döring</title>
+    <link href="../assets/css/bdoering.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+    
+    <div class="navbar navbar-default navbar-static-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../">BJÖRN DÖRING</a>
+        </div>
+        <div class="collapse navbar-collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="../index.html">Home</a></li>
+            <li><a href="../about.html">About</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+
+    <div class="container">
+      <h1>Internal Calibration – Or is it?</h1>
+<div class="info">
+    Posted on October  7, 2014
+    
+        by Björn Döring
+    
+</div>
+
+<p>Calibration is the topic I have been working on for the last few years. In <a href="https://en.wikipedia.org/wiki/Synthetic_aperture_radar">synthetic aperture radar</a> (SAR), one of the calibration tasks is <em>radiometric calibration</em>, which ensures that gray scale values in <a href="http://www.dlr.de/eo/en/desktopdefault.aspx/tabid-6695/10983_read-10126/gallery-1/gallery_read-Image.1.3751/">SAR</a> <a href="http://www.dlr.de/eo/en/desktopdefault.aspx/tabid-6695/10983_read-10126/gallery-1/gallery_read-Image.1.3770/">images</a> are comparable and compatible across image acquisitions and missions.</p>
+<p>A good calibration requires one to be accurate, both in measurements and in terminology. This post is about the second, specifically about the (from my point of view wrong) usage of <em>internal calibration</em> in SAR.</p>
+<p><strong>tl;dr</strong>: Go to the <a href="#conclusions">wrap up</a> if you just want to know my suggestion of how to improve used terminology.</p>
+<h2 id="the-background-what-actually-is-calibration">The Background: What Actually is Calibration?</h2>
+<p>Let’s turn to definitions. Maybe the best known technical standard in the world of metrology is the <a href="http://www.bipm.org/en/publications/guides/gum.html"><em>Guide to the Expression of Uncertainty in Measurement</em></a> (GUM), which is the only internationally accepted standard on measurement uncertainties. In the accompanying <a href="http://www.bipm.org/en/publications/guides/#vim"><em>International Vocabulary of Metrology</em></a> (VIM), calibration is defined as follows:</p>
+<blockquote>
+<p>operation that, under specified conditions, in a first step, establishes a relation between the quantity values with measurement uncertainties provided by measurement standards and corresponding indications with associated measurement uncertainties and, in a second step, uses this information to establish a relation for obtaining a measurement result from an indication</p>
+</blockquote>
+<p>The definition of calibration might be a bit wordy, but it stresses the importance of a measurement standard, a reference with which the calibration is conducted.</p>
+<h2 id="the-problem-internal-and-external-calibration-in-synthetic-aperture-radar">The Problem: Internal and External Calibration in Synthetic Aperture Radar</h2>
+<p>So how are the terms <em>internal</em> and <em>external</em> calibration currently used in SAR?</p>
+<dl>
+<dt>Internal Calibration</dt>
+<dd><p>Internal calibration refers to the process of estimating and correcting for amplitude and phase drifts of the SAR instrument. The drifts are mostly caused by temperature changes, but component aging or mechanical movement (e. g. of cables) are other further causes.</p>
+<p>The process of internal calibration is specific to a single SAR instrument. Internal calibration results (i. e., corrections) are never carried over to another SAR instrument.</p>
+</dd>
+<dt>External Calibration</dt>
+<dd><p>For external calibration, (calibrated) measurement standards like corner reflectors or transponders are distributed and aligned on ground. After image acquisition by a SAR instrument, the responses of the known radar targets are used to estimate SAR system calibration factors (most notably the radiometric calibration constant).</p>
+<p>After external calibration, metrological traceability is established; measurement results from different SAR instruments become comparable.</p>
+</dd>
+</dl>
+<p>The problem is that the term <em>internal calibration</em> is used for a procedure which does not comprise any calibration standard. No calibration is actually happening. In contrast, the term <em>external calibration</em> describes an actual calibration in accordance with the GUM definition given above.</p>
+<p>By the way: A transponder is an active device (it has an amplifier loop) and, like a SAR instrument, it suffers from gain and phase drifts due to temperature changes or component aging. It also requires what is currently called an <em>internal calibration loop</em> to monitor and correct these drifts. So whenever I talk about <em>internal calibration</em> in this post, I mean the internal calibration of SAR satellites and SAR calibration transponders alike.</p>
+<h2 id="the-resolution-alternative-terminology">The Resolution: Alternative Terminology</h2>
+<p>What is currently known as <em>internal calibration</em> is a correction for a systematic effect (temperature drift or component aging). The VIM defines correction as:</p>
+<blockquote>
+<p>compensation for an estimated systematic effect</p>
+</blockquote>
+<p>This is exactly what is going on in a SAR instrument or a transponder: A systematic effect is estimated by routing signals with a known amplitude through the <a href="http://en.wikipedia.org/wiki/Radio_frequency">RF</a> loop. Subsequent analysis reveals by how much the amplitude or phase has drifted in comparison to an earlier measurement. The estimated drift is then either compensated directly (in the case of a transponder) or during later data processing (for SAR satellites, where drifts are currently only corrected on-ground after the data has been downloaded).</p>
+<p>Consequently, what we currently call <em>internal calibration</em> should actually be called <strong>(internal) drift correction</strong> and the <em>internal calibration loop</em> should rather be called <strong>(internal) drift correction loop</strong>.</p>
+<h2 id="when-is-the-terminology-internal-calibration-appropriate">When is the Terminology <em>Internal Calibration</em> Appropriate?</h2>
+<p>Some measurement instruments (other than SAR instruments or calibration transponders) actually have a measurement standard built in. The process of internal calibration then refers to measuring this internal standard in an automated fashion in order to update the relationship between a quantity value of a measurement standard and a measurement result.</p>
+<p>An examples of such a measurement instrument is a precision weighing scale like the <a href="http://www.aandd.jp/products/weighing/balance/industrial/gp.html">GP-20K</a> built by A&amp;D Weighing. An internal measurement standard and a motor allow automatized calibrations.</p>
+<p>For SAR, including an internal measurement standard is not an option. The quantity that needs to be measured is by necessity in the far field of the instrument and therefore cannot be internal to it.</p>
+<p>Practically speaking though, the terms <em>internal</em> and <em>external calibration</em> are used similarly for scales and SAR instruments: In both domains is internal calibration used frequently and external calibration only periodically to ensure compatible measurement results with low measurement uncertainties.</p>
+<h2 id="conclusions">Wrap up: Recommended Terminology</h2>
+<p>In the context of synthetic aperture radar:</p>
+<ol style="list-style-type: decimal">
+<li>All calibration (radiometric and geometric) is by necessity <em>external</em>. So <em>external calibration</em> should simply be called <em>calibration</em>. (Also, every calibration is always <em>absolute</em>, so let’s not use the term <em>absolute calibration</em> either.)</li>
+<li><em>Internal calibration</em> is a misnomer. Calibration always requires a measurement standard, but no measurement standards are included in what is called <em>internal calibration</em> in SAR today. A possible alternative term: <em>(internal) drift correction</em>.</li>
+</ol>
+<p>Adopting an accurate terminology avoids confusions and ensures compatibility with other fields of metrology. From experience, it certainly helps in not misleading students which are new to the field of SAR calibration.</p>
+
+<p class="text-center disqus-btn">
+  <button id="btn-interact" data-toggle="button" type="button" class="btn btn-default btn-bw">
+    <span class="glyphicon glyphicon-hand-down"></span>
+    Interact!
+  </button>
+</p>
+
+<div id="interact" class="hidden">
+  <!-- Flattr button -->
+  <script id="fb0cg6l">(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=bdoering&button=compact&url='+encodeURIComponent(document.URL);f.title='Flattr';f.height=20;f.width=110;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('fb0cg6l');</script>
+  
+  
+  <!-- Disqus comments -->
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+    var disqus_shortname = 'bdoering'; // required: replace example with your forum shortname
+    (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div> <!-- interact -->
+
+    </div><!-- /.container -->
+
+    <div class="footer">
+      <div class="container">
+	<p class="text-right">Site proudly generated by <a href="http://jaspervdj.be/hakyll/">Hakyll</a>!</p>
+      </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../assets/js/ie10-viewport-bug-workaround.js"></script>
+
+    <script src="../assets/js/post-interact.js"></script>
+
+
+  </body>
+</html>
+

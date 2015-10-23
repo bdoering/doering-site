@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Personal webpage and blog">
+    <meta name="author" content="Björn J. Döring">
+    <link rel="icon" href="../favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
+
+    <title>A Self-Hosted Inbox for Large Files Power by Happstack and The Raspberry Pi — Björn Döring</title>
+
+    
+    
+    
+    
+
+    <link href="../assets/css/bdoering.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+    
+    <div class="navbar navbar-default navbar-static-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../">BJÖRN DÖRING</a>
+        </div>
+        <div class="collapse navbar-collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="../index.html">Home</a></li>
+            <li><a href="../about.html">About</a></li>
+	    <li><a href="../atom.xml">Feed</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+
+    <div class="container">
+      <h1>A Self-Hosted Inbox for Large Files Power by Happstack and The Raspberry Pi</h1>
+<div class="info">
+  Posted on October 30, 2015
+  
+</div>
+
+
+<div class="bs-callout bs-callout-toc">
+  <h2 class="contents">Contents</h2>
+  <ul>
+<li><a href="#how-to-collect-files-from-family-and-friends-after-a-wedding-or-a-holiday-trip">How to Collect Files from Family and Friends after a Wedding or a Holiday Trip?</a></li>
+<li><a href="#a-simple-upload-form-based-on-happstack-and-resumable.js">A Simple Upload Form Based on Happstack and Resumable.js</a></li>
+<li><a href="#caveat">Caveat</a></li>
+<li><a href="#some-notes-on-the-server-setup">Some Notes on the Server Setup</a><ul>
+<li><a href="#free-dns">Free DNS</a></li>
+<li><a href="#nginx-configuration">Nginx configuration</a></li>
+<li><a href="#supervisor-configuration">Supervisor configuration</a></li>
+</ul></li>
+<li><a href="#conclusions">Conclusions</a></li>
+</ul>
+</div>
+
+
+
+<h2 id="how-to-collect-files-from-family-and-friends-after-a-wedding-or-a-holiday-trip">How to Collect Files from Family and Friends after a Wedding or a Holiday Trip?</h2>
+<p>I have found myself repeatedly in a situation where I wanted to collect photos, videos, or some other files from my family and friends: Think wedding, or holiday trip! For this, I see two principal options:</p>
+<ul>
+<li>There are freemium cloud services like <a href="https://www.dropbox.com">Dropbox</a>, <a href="https://www.box.com">Box</a>, or <a href="https://www.google.com/drive/">Google Drive</a>.</li>
+<li>And there are many, many options for peer-to-peer file sharing, for instance <a href="https://en.wikipedia.org/wiki/Bittorrent">Bittorrent</a>.</li>
+</ul>
+<p>As much as I like the concept of peer-to-peer communications, this option is outright too complicated for many less tech-savvy family members and friends. And even the cloud-based option has a couple of downsides:</p>
+<ul>
+<li>First, you let a company host your data, and depending on the service, you may even give up some rights. I like to avoid that if possible.</li>
+<li>Second, everybody who uploads pictures etc. needs to register at that site. This is simple for the young folks, but for collecting pictures from family members of all generations after a wedding, for instance, the technical barrier for sharing a folder of pictures should be as low as possible.</li>
+<li>And finally, if you want to collect a lot of data (25 GB seems to be the maximum that is available for free at the moment), you need to pay.</li>
+</ul>
+<p>Well, there are other solutions! The one I wanted to explore and which I am going to explain in the following is based on a self-hosted solution using a very small and energy efficient computer, the <a href="https://www.raspberrypi.org/">Raspberry Pi</a>, a large hard drive, and a very simple web server written in the Haskell web framework <a href="http://www.happstack.com">Happstack</a>.</p>
+<h2 id="a-simple-upload-form-based-on-happstack-and-resumable.js">A Simple Upload Form Based on Happstack and Resumable.js</h2>
+<p>When I was looking for a suitable web framework, I explored several options but ended up to use Happstack Lite because I could compile it directly on the Raspberry Pi (model B+, running ARM v6). In comparison to other frameworks that I tried (<a href="http://snapframework.com/">Snap</a>, <a href="http://www.yesodweb.com/">Yesod</a>, <a href="https://github.com/scotty-web/scotty">Scotty</a>), I managed to actually compile <a href="http://www.happstack.com/page/view-page-slug/9/happstack-lite">Happstack Lite</a> on <a href="https://www.raspberrypi.org/downloads/raspbian/">Raspbian Jessie</a>, which comes with GHC 7.6.3 (but no support for Template Haskell).</p>
+<p>The source code of a simple demo server is located at my <a href="https://github.com/bdoering/hs-pi-upload">Github repository</a>. This basically provides the server functionality to serve and exploit the excellent <a href="http://www.resumablejs.com/">Resumable.js</a> Javascript library. Resumable.js runs on modern browsers and makes use of the HTML5 File API. It allows to chunk large files on the client so that the server never has to handle files larger than e.g. 1 MB. A perfect fit for the small processing power of the Raspberry Pi! Also, the library allows a client to resume an upload should the connection be interrupted. Great for uploading all these large videos from the wedding over an unreliable Internet connection ;-)</p>
+<p>To install the webserver on Raspbian Jessie, do:</p>
+<ol>
+<li>Log into the Raspberry Pi.</li>
+<li><p>Install some prerequisites, something along the lines of:</p>
+<pre><code>sudo apt-get install ghc git</code></pre></li>
+<li><p>Get the server source code from git:</p>
+<pre><code>git clone https://github.com/bdoering/hs-pi-upload.git</code></pre></li>
+<li>Edit the configuration at <code>hs-pi-upload/src/Config.hs</code> (which for the sake of simplicity is just a simple Haskell file). You will probably want to set up the upload directories to point to a location on an external hard drive. Just make sure that the paths actually exist.</li>
+<li><p>Then compile the source code:</p>
+<pre><code># cd to the directory containing the file &quot;hs-pi-upload.cabal&quot;
+cabal sandbox init
+cabal update
+cabal install # Get lots of coffee now, the Pi is slow!</code></pre></li>
+<li><p>Finally, you can run the server with:</p>
+<pre><code>./.cabal-sandbox/bin/hs-pi-upload-exe</code></pre>
+<p>This will start the server on port 8000 (the <a href="http://www.happstack.com/page/view-page-slug/9/happstack-lite">Happstack Lite</a> default).</p></li>
+</ol>
+<p>The actual upload form is served statically, and the file is actually the nearly unmodified demo from <a href="https://github.com/23/resumable.js/blob/master/samples/java/src/main/webapp/index.html" class="uri">https://github.com/23/resumable.js/blob/master/samples/java/src/main/webapp/index.html</a>. The server’s role is to check for each uploaded chunk if the chunk has already been uploaded, and upon completion of all chunk uploads, to reassemble the files into the final file.</p>
+<h2 id="caveat">Caveat</h2>
+<p>The web server is admittedly very simple and has the following shortcomings (or features, depending on how you want to see it):</p>
+<ul>
+<li>No protection of the upload form (anybody with the link can upload something). Most easy workaround would be to run the Happstack server behind another web server such as Nginx, and to enable basic authentication there.</li>
+<li>Existing files are overwritten (which is good if somebody forgot something and wants to upload the (zip) file again.</li>
+</ul>
+<h2 id="some-notes-on-the-server-setup">Some Notes on the Server Setup</h2>
+<p>Here are some more tips on how you may run the Happstack server on the Raspberry Pi and to make it reachable over the Internet. Of course, you will also need to modify the settings of your router so that port 80 is actually forwarded to the Raspberry Pi.</p>
+<h3 id="free-dns">Free DNS</h3>
+<p>If you have a simple DSL connection like me, the publicly visible IP address of the Raspberry Pi will change regularly. So, we need a DNS entry. If you don’t want to pay and are OK with a “random” name for your server, there are several free services available. I personally like <a href="https://freedns.afraid.org/">FreeDNS</a> a lot as it allows me to set up more than one DNS entry for free easily.</p>
+<p>Once you have registered, you can set up a <em>subdomain</em> (a <em>Type A</em> entry). If you then go to the page <em>Dynamic DNS</em>, you can find a <code>wget</code> command which you can add as an entry to the <code>crontab</code> running on the Raspberry Pi so that the DNS entry is updated automatically. My crontab entry (user <code>root</code>) looks something like this:</p>
+<pre><code>*/5 * * * * wget -q --read-timeout=0.0 --waitretry=5 --tries=400 --background http://freedns.afraid.org/dynamic/update.php?SEKRETKEYabcdefg1234567890ABCDEFGHIKKLM= -O /dev/null</code></pre>
+<h3 id="nginx-configuration">Nginx configuration</h3>
+<p>Putting the Happstack upload server behind an <a href="http://nginx.org/">Nginx</a> server allows to easily run more than one server on the same machine. Also, we can easily define rewrite rules.</p>
+<p>In this case, I just added the following server configuration to <code>/etc/nginx/sites-enabled/default</code>:</p>
+<pre><code># Happstack server, running on port 8000
+server {
+      listen 80;
+      server_name MYDNSNAME.mooo.com; # mooo.com is provided by FreeDNS
+
+      rewrite ^/upload$ /static/html/upload.html redirect;
+
+      location / {
+               proxy_pass http://localhost:8000;
+               proxy_redirect off;
+               proxy_set_header Host $host;
+               proxy_set_header X-Real-IP $remote_addr;
+               proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+               client_max_body_size 10m;
+               client_body_buffer_size 128k;
+               proxy_connect_timeout 90;
+               proxy_send_timeout 90;
+               proxy_read_timeout 90;
+               proxy_buffer_size 4k;
+               proxy_buffers 4 32k;
+               proxy_busy_buffers_size 64k;
+               proxy_temp_file_write_size 64k;
+      }
+}</code></pre>
+<p>Make sure to restart Nginx with <code>service nginx restart</code> after you modified the configuration.</p>
+<h3 id="supervisor-configuration">Supervisor configuration</h3>
+<p>The HTML server should be started automatically whenever the Raspberry Pi reboots. Also, the server should be restarted automatically if it crashes. For this we can use <a href="http://supervisord.org/">Supervisor</a>, a program which allows to monitor and control other processes.</p>
+<p>My setup for the Happstack server looks very simple. The file <code>/etc/supervisor/conf.d/hs-pi-upload.conf</code> just contains the following:</p>
+<pre><code>[program:hs-pi-upload]
+command=/path/to/sandbox/hs-pi-upload/.cabal-sandbox/bin/hs-pi-upload-exe
+user=pi
+stdout_logfile_backups=2
+stdout_logfile_maxbytes=20MB</code></pre>
+<p>To apply the changes, I restart Supervisor with <code>service supervisor restart</code>.</p>
+<h2 id="conclusions">Conclusions</h2>
+<p>Running a compiled Haskell web server on the Raspberry Pi resulted in a surprisingly good performance. If you have a good DSL connection, uploads to this server are basically as fast as to any other cloud based services such as Dropbox. Pretty cool! And all that running on such humble hardware, powered 100 % by open source software.</p>
+<p>But keep in mind: Now that <em>you</em> host the data, you also need to care for backups and make sure that the server keeps running — otherwise you’ll get calls quickly once you gave the upload link to some friends ;-)</p>
+<p>Happy uploading!</p>
+
+<p class="text-center disqus-btn">
+  <button id="btn-interact" data-toggle="button" type="button" class="btn btn-default btn-bw">
+    <span class="glyphicon glyphicon-hand-down"></span>
+    Interact!
+  </button>
+</p>
+
+<div id="interact" class="hidden">
+  <!-- Flattr button -->
+  <script id="fb0cg6l">(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=bdoering&button=compact&url='+encodeURIComponent(document.URL);f.title='Flattr';f.height=20;f.width=110;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('fb0cg6l');</script>
+  
+  
+  <!-- Disqus comments -->
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+    var disqus_shortname = 'bdoering'; // required: replace example with your forum shortname
+    (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div> <!-- interact -->
+
+    </div><!-- /.container -->
+
+    <div class="footer">
+      <div class="container">
+	<p class="text-right">Site proudly generated by <a href="http://jaspervdj.be/hakyll/">Hakyll</a>!</p>
+      </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../assets/js/ie10-viewport-bug-workaround.js"></script>
+
+    <script src="../assets/js/post-interact.js"></script>
+
+
+  </body>
+</html>
+
