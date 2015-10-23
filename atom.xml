@@ -8,8 +8,16 @@
         <name>Björn J. Döring</name>
         <email>bjoern.doering@gmail.com</email>
     </author>
-    <updated>2015-01-26T00:00:00Z</updated>
+    <updated>2015-10-23T00:00:00Z</updated>
     <entry>
+    <title>A Self-Hosted Inbox for Large Files Power by Happstack and The Raspberry Pi</title>
+    <link href="http://doering.io/posts/2015-10-23-happstack-upload-on-raspberry-pi.html" />
+    <id>http://doering.io/posts/2015-10-23-happstack-upload-on-raspberry-pi.html</id>
+    <published>2015-10-23T00:00:00Z</published>
+    <updated>2015-10-23T00:00:00Z</updated>
+    <summary type="html"><![CDATA[How to collect pictures, movies and other files from family and friends with a self-hosted solution]]></summary>
+</entry>
+<entry>
     <title>Bayesian Parameter Estimation with Metropolis MCMC in Haskell</title>
     <link href="http://doering.io/posts/2015-01-26-mcmc-metropolis-in-haskell.html" />
     <id>http://doering.io/posts/2015-01-26-mcmc-metropolis-in-haskell.html</id>

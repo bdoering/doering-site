@@ -74,11 +74,11 @@
 <p>If you want to get serious with <abbr title="Monte Carlo Markov Chain">MCMC</abbr>, then there are many full-fledged, efficient <abbr title="Monte Carlo Markov Chain">MCMC</abbr> packages implemented in various programming languages. I have had good success with <a href="https://pymc-devs.github.io/pymc/">PyMC 2</a> for Python so far (and I am really looking forward to the much improved interface of <a href="https://github.com/pymc-devs/pymc">PyMC 3</a>, which is not yet officially released). The “new kid on the block” seems to be <a href="http://mc-stan.org/">STAN</a>, whose <a href="https://pystan.readthedocs.org/en/latest/getting_started.html">Python interface</a> is also a pleasure to work with.</p>
 <p>But now let’s get started, shall we?</p>
 <h2 id="metropolis-monte-carlo-markov-chain-in-haskell">Metropolis Monte Carlo Markov Chain in Haskell</h2>
-<p>Let’s look at a simple estimation example: linear regression. The idea is that we have measured <span class="math">\(N\)</span> samples <span class="math">\(y_i\)</span>, <span class="math">\(i = 1 \dots N\)</span>, for given <span class="math">\(x_i\)</span>. We want to model the data according to <span class="math">\[y_i = ax_i + b + e_i,\]</span> <span class="math">\[e \sim \mathrm{N}(0, \sigma^2),\]</span> i. e., we want to fit a line through some noisy data. The unknowns are <span class="math">\(a\)</span>, <span class="math">\(b\)</span>, and <span class="math">\(\sigma\)</span>. Alternatively we could have written <span class="math">\[y \sim \mathrm{N}(ax + b, \sigma^2).\]</span></p>
+<p>Let’s look at a simple estimation example: linear regression. The idea is that we have measured <span class="math inline">\(N\)</span> samples <span class="math inline">\(y_i\)</span>, <span class="math inline">\(i = 1 \dots N\)</span>, for given <span class="math inline">\(x_i\)</span>. We want to model the data according to <span class="math display">\[y_i = ax_i + b + e_i,\]</span> <span class="math display">\[e \sim \mathrm{N}(0, \sigma^2),\]</span> i. e., we want to fit a line through some noisy data. The unknowns are <span class="math inline">\(a\)</span>, <span class="math inline">\(b\)</span>, and <span class="math inline">\(\sigma\)</span>. Alternatively we could have written <span class="math display">\[y \sim \mathrm{N}(ax + b, \sigma^2).\]</span></p>
 <p>The concrete example we are going to look at is inspired by a <a href="https://theoreticalecology.wordpress.com/2010/09/17/metropolis-hastings-mcmc-in-r/">post</a> on an implementation of the Metropolis algorithm in <a href="http://www.r-project.org/">R</a>. Here I want to implement it using <a href="https://www.haskell.org/">Haskell</a>, not only to practice the language, but also to explore how well this compiled language lends itself to numerical simulations like this. Thanks to <a href="https://idontgetoutmuch.wordpress.com/2014/03/20/bayesian-analysis-a-conjugate-prior-and-markov-chain-monte-carlo/">another blog post</a>, it was a surprisingly pleasant experience.</p>
 <p>By the way, the <a href="https://github.com/bdoering/doering-site/blob/master/posts/2015-01-26-mcmc-metropolis-in-haskell.lhs">source file</a> of this blog post is a <a href="https://www.haskell.org/haskellwiki/Literate_programming">literate Haskell</a> file which can directly be compiled and executed, should you want to try it out for yourself!</p>
 <p>Let’s get started with some imports…</p>
-<pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Control.Monad</span>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Control.Monad</span>
 <span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Control.Monad.State</span> (evalState)
 <span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Data.Histogram</span> (asList)
 <span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Data.Histogram.Fill</span>
@@ -91,12 +91,12 @@
 <span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Statistics.Distribution.Uniform</span>
 <span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Text.JSON</span>
 <span class="ot">&gt;</span> <span class="kw">import qualified</span> <span class="dt">Data.Histogram</span> <span class="kw">as</span> <span class="dt">H</span>
-<span class="ot">&gt;</span> <span class="kw">import qualified</span> <span class="dt">Data.Vector.Unboxed</span> <span class="kw">as</span> <span class="dt">V</span></code></pre>
-<p>Our model relates the known variable <span class="math">\(x\)</span> to an output value <span class="math">\(y\)</span>, as long as <span class="math">\(a\)</span>, and <span class="math">\(b\)</span> are known:</p>
-<pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; predict ::</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span><span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span>
-<span class="ot">&gt;</span> predict a b x <span class="fu">=</span> a <span class="fu">*</span> x <span class="fu">+</span> b</code></pre>
-<p>Having defined this, we can generate some noisy test data now. Later on we will try to estimate the true values for <span class="math">\(a\)</span>, <span class="math">\(b\)</span>, and <span class="math">\(\sigma\)</span> from this test data.</p>
-<pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> trueA, trueB,<span class="ot"> trueSd ::</span> <span class="dt">Double</span>
+<span class="ot">&gt;</span> <span class="kw">import qualified</span> <span class="dt">Data.Vector.Unboxed</span> <span class="kw">as</span> <span class="dt">V</span></code></pre></div>
+<p>Our model relates the known variable <span class="math inline">\(x\)</span> to an output value <span class="math inline">\(y\)</span>, as long as <span class="math inline">\(a\)</span>, and <span class="math inline">\(b\)</span> are known:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; predict ::</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span><span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span>
+<span class="ot">&gt;</span> predict a b x <span class="fu">=</span> a <span class="fu">*</span> x <span class="fu">+</span> b</code></pre></div>
+<p>Having defined this, we can generate some noisy test data now. Later on we will try to estimate the true values for <span class="math inline">\(a\)</span>, <span class="math inline">\(b\)</span>, and <span class="math inline">\(\sigma\)</span> from this test data.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> trueA, trueB,<span class="ot"> trueSd ::</span> <span class="dt">Double</span>
 <span class="ot">&gt;</span> trueA <span class="fu">=</span> <span class="dv">5</span>
 <span class="ot">&gt;</span> trueB <span class="fu">=</span> <span class="dv">0</span>
 <span class="ot">&gt;</span> trueSd <span class="fu">=</span> <span class="dv">10</span>
@@ -113,11 +113,11 @@
 <span class="ot">&gt; ys ::</span> [<span class="dt">Double</span>]
 <span class="ot">&gt;</span> ys <span class="fu">=</span> zipWith (<span class="fu">+</span>) noise (map (predict trueA trueB) xs)
 <span class="ot">&gt;</span>   <span class="kw">where</span> noise <span class="fu">=</span> evalState (replicateM nSamples (sample (<span class="dt">Normal</span> <span class="fl">0.0</span> trueSd)))
-<span class="ot">&gt;</span>                 (pureMT <span class="fu">$</span> fromIntegral arbSeed)</code></pre>
+<span class="ot">&gt;</span>                 (pureMT <span class="fu">$</span> fromIntegral arbSeed)</code></pre></div>
 <p>In order to include plots in this page, I use the <a href="http://c3js.org/">C3.js</a> JavaScript chart library, which can read in <abbr title="JavaScript Object Notation">JSON</abbr> data. So we export the generated test data as a <abbr title="JavaScript Object Notation">JSON</abbr> file:</p>
-<pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; exportTestData ::</span> <span class="dt">IO</span> ()
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; exportTestData ::</span> <span class="dt">IO</span> ()
 <span class="ot">&gt;</span> exportTestData <span class="fu">=</span> writeFile <span class="st">&quot;test-data.json&quot;</span> <span class="fu">.</span> encode <span class="fu">.</span> toJSObject <span class="fu">$</span>
-<span class="ot">&gt;</span>                  [(<span class="st">&quot;x&quot;</span>, xs), (<span class="st">&quot;y&quot;</span>, ys)]</code></pre>
+<span class="ot">&gt;</span>                  [(<span class="st">&quot;x&quot;</span>, xs), (<span class="st">&quot;y&quot;</span>, ys)]</code></pre></div>
 <p>This is what our generated test data looks like, <code>ys</code> over <code>xs</code>:</p>
 <p class="text-center">
 Generated noisy test data
@@ -125,64 +125,64 @@ Generated noisy test data
 <div id="chart_testdata">
 
 </div>
-<p>In order to draw from the posterior, we need to determine the likelihood function and the prior. Let’s start with the likelihood. The record level likelihood is given as <span class="math">\[ p(y_i|a, b, \sigma, x_i) = \frac{1}{\sqrt{2\pi}\sigma} \exp \left[ -\frac{(y_i-(ax_i + b))^2}{2\sigma^2} \right], \]</span> i. e., the probability of sample <span class="math">\(y_i\)</span> under a normal distribution with mean <span class="math">\(a x_i + b\)</span> and variance <span class="math">\(\sigma^2\)</span>. Each sample <span class="math">\(y_i\)</span> is assumed to be drawn independently, so the model-level likelihood for the complete sample <span class="math">\(y\)</span> is the product of the separate likelihoods, or <span class="math">\[ p(y|a, b, \sigma, x) = \prod_{i=1}^N \frac{1}{\sqrt{2\pi}\sigma} \exp \left[-\frac{(y_i-(ax_i + b))^2}{2\sigma^2} \right]. \]</span></p>
-<p>In numerical implementations one usually does not compute the likelihood, but the log-likelihood in order to avoid problems with small numbers: <span class="math">\[  \log [p(y|a, b, \sigma, x)] = \sum_{i=1}^N \frac{1}{2\sigma} \exp \left[ -\frac{(y_i-(ax_i + b))^2}{2\sigma^2} \right]. \]</span> The location of the maximum of the log-likelihood function remains unchanged.</p>
+<p>In order to draw from the posterior, we need to determine the likelihood function and the prior. Let’s start with the likelihood. The record level likelihood is given as <span class="math display">\[ p(y_i|a, b, \sigma, x_i) = \frac{1}{\sqrt{2\pi}\sigma} \exp \left[ -\frac{(y_i-(ax_i + b))^2}{2\sigma^2} \right], \]</span> i. e., the probability of sample <span class="math inline">\(y_i\)</span> under a normal distribution with mean <span class="math inline">\(a x_i + b\)</span> and variance <span class="math inline">\(\sigma^2\)</span>. Each sample <span class="math inline">\(y_i\)</span> is assumed to be drawn independently, so the model-level likelihood for the complete sample <span class="math inline">\(y\)</span> is the product of the separate likelihoods, or <span class="math display">\[ p(y|a, b, \sigma, x) = \prod_{i=1}^N \frac{1}{\sqrt{2\pi}\sigma} \exp \left[-\frac{(y_i-(ax_i + b))^2}{2\sigma^2} \right]. \]</span></p>
+<p>In numerical implementations one usually does not compute the likelihood, but the log-likelihood in order to avoid problems with small numbers: <span class="math display">\[  \log [p(y|a, b, \sigma, x)] = \sum_{i=1}^N \frac{1}{2\sigma} \exp \left[ -\frac{(y_i-(ax_i + b))^2}{2\sigma^2} \right]. \]</span> The location of the maximum of the log-likelihood function remains unchanged.</p>
 <p>In Haskell the log-likelihood is:</p>
-<pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; loglikelihood ::</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; loglikelihood ::</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span>
 <span class="ot">&gt;</span> loglikelihood a b sd <span class="fu">=</span> sum <span class="fu">$</span> zipWith lh xs ys
-<span class="ot">&gt;</span>   <span class="kw">where</span> lh x <span class="fu">=</span> logDensity (normalDistr (predict a b x) sd)</code></pre>
-<p>As an example, we can plot the log-likelihood <span class="math">\(p(y|a, b=0, \sigma=10, x)\)</span>, showing how likely the samples <span class="math">\((x_i, y_i)\)</span>, <span class="math">\(i=1 \dots N\)</span>, are for varying <span class="math">\(a\)</span>, a fixed <span class="math">\(b=0\)</span>, and a fixed <span class="math">\(\sigma=10\)</span> (again by exporting the data to a <abbr title="JavaScript Object Notation">JSON</abbr> file first):</p>
-<pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; exportLikelihoodA ::</span> <span class="dt">IO</span> ()
+<span class="ot">&gt;</span>   <span class="kw">where</span> lh x <span class="fu">=</span> logDensity (normalDistr (predict a b x) sd)</code></pre></div>
+<p>As an example, we can plot the log-likelihood <span class="math inline">\(p(y|a, b=0, \sigma=10, x)\)</span>, showing how likely the samples <span class="math inline">\((x_i, y_i)\)</span>, <span class="math inline">\(i=1 \dots N\)</span>, are for varying <span class="math inline">\(a\)</span>, a fixed <span class="math inline">\(b=0\)</span>, and a fixed <span class="math inline">\(\sigma=10\)</span> (again by exporting the data to a <abbr title="JavaScript Object Notation">JSON</abbr> file first):</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; exportLikelihoodA ::</span> <span class="dt">IO</span> ()
 <span class="ot">&gt;</span> exportLikelihoodA <span class="fu">=</span> writeFile <span class="st">&quot;log-likelihood.json&quot;</span> <span class="fu">.</span> encode <span class="fu">.</span> toJSObject <span class="fu">$</span>
 <span class="ot">&gt;</span>                     (\as <span class="ot">-&gt;</span> [ (<span class="st">&quot;x&quot;</span>, as),
 <span class="ot">&gt;</span>                              (<span class="st">&quot;loglikelihood&quot;</span>, map (\a <span class="ot">-&gt;</span> loglikelihood a trueB trueSd) as )])
-<span class="ot">&gt;</span>                     [<span class="dv">3</span>, <span class="fl">3.05</span> <span class="fu">..</span> <span class="dv">7</span><span class="ot">::</span><span class="dt">Double</span>]</code></pre>
+<span class="ot">&gt;</span>                     [<span class="dv">3</span>, <span class="fl">3.05</span> <span class="fu">..</span> <span class="dv">7</span><span class="ot">::</span><span class="dt">Double</span>]</code></pre></div>
 <p class="text-center">
-Log-likelihood <span class="math">\(p(y|a, b=0, \sigma=10, x)\)</span>
+Log-likelihood <span class="math inline">\(p(y|a, b=0, \sigma=10, x)\)</span>
 </p>
 <div id="chart_loglikelihood">
 
 </div>
-<p>We can see that <span class="math">\(a=5\)</span> is very close to the maximum. The remaining offset is a result of the random nature of our test samples <span class="math">\((x_i, y_i)\)</span>.</p>
+<p>We can see that <span class="math inline">\(a=5\)</span> is very close to the maximum. The remaining offset is a result of the random nature of our test samples <span class="math inline">\((x_i, y_i)\)</span>.</p>
 <p>As for any Bayesian data analysis, we also need a prior. Here we choose rather uninformative priors which have little influence on the estimated parameters:</p>
-<pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; logprior ::</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; logprior ::</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span>
 <span class="ot">&gt;</span> logprior a b sd <span class="fu">=</span> sum [ap, bp, sdp]
 <span class="ot">&gt;</span>   <span class="kw">where</span>
 <span class="ot">&gt;</span>     ap  <span class="fu">=</span> logDensity (uniformDistr <span class="dv">0</span> <span class="dv">10</span>) a
 <span class="ot">&gt;</span>     bp  <span class="fu">=</span> logDensity (normalDistr <span class="dv">0</span> <span class="dv">5</span>) b
-<span class="ot">&gt;</span>     sdp <span class="fu">=</span> logDensity (uniformDistr <span class="dv">0</span> <span class="dv">30</span>) sd</code></pre>
+<span class="ot">&gt;</span>     sdp <span class="fu">=</span> logDensity (uniformDistr <span class="dv">0</span> <span class="dv">30</span>) sd</code></pre></div>
 <p>The (unscaled) log-posterior is now given as the sum of the log-likelihood and the log-prior:</p>
-<pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; logposterior ::</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span>
-<span class="ot">&gt;</span> logposterior a b sd <span class="fu">=</span> loglikelihood a b sd <span class="fu">+</span> logprior a b sd</code></pre>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; logposterior ::</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span>
+<span class="ot">&gt;</span> logposterior a b sd <span class="fu">=</span> loglikelihood a b sd <span class="fu">+</span> logprior a b sd</code></pre></div>
 <p>Now we can start to actually implement the Metropolis <abbr title="Monte Carlo Markov Chain">MCMC</abbr>. The Metropolis algorithm is a random walk algorithm. Each of the</p>
-<pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; nIters ::</span> <span class="dt">Int</span>
-<span class="ot">&gt;</span> nIters <span class="fu">=</span> <span class="dv">100000</span></code></pre>
-<p>steps in the random walk only depends on the current state (location in the parameter space) and an acceptance/rejection criterion (which involves random numbers). To go from the current location <span class="math">\((a, b, \sigma)\)</span> to a proposed location <span class="math">\((a + \Delta a, b + \Delta b, \sigma + \Delta\sigma)\)</span>, we need to generate random delta values with zero mean. Let’s define a general function for generating a list of random values from a seed:</p>
-<pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; normalisedProposals ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> [<span class="dt">Double</span>]
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; nIters ::</span> <span class="dt">Int</span>
+<span class="ot">&gt;</span> nIters <span class="fu">=</span> <span class="dv">100000</span></code></pre></div>
+<p>steps in the random walk only depends on the current state (location in the parameter space) and an acceptance/rejection criterion (which involves random numbers). To go from the current location <span class="math inline">\((a, b, \sigma)\)</span> to a proposed location <span class="math inline">\((a + \Delta a, b + \Delta b, \sigma + \Delta\sigma)\)</span>, we need to generate random delta values with zero mean. Let’s define a general function for generating a list of random values from a seed:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; normalisedProposals ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> [<span class="dt">Double</span>]
 <span class="ot">&gt;</span> normalisedProposals seed sigma nIters <span class="fu">=</span>
 <span class="ot">&gt;</span>   evalState (replicateM nIters (sample (<span class="dt">Normal</span> <span class="fl">0.0</span> sigma)))
-<span class="ot">&gt;</span>   (pureMT <span class="fu">$</span> fromIntegral seed)</code></pre>
+<span class="ot">&gt;</span>   (pureMT <span class="fu">$</span> fromIntegral seed)</code></pre></div>
 <p>At each step, the Metropolis algorithm needs to decide if the proposed jump is accepted, for which random draws from a standard uniform distribution are required:</p>
-<pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; acceptOrRejects ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> [<span class="dt">Double</span>]
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; acceptOrRejects ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> [<span class="dt">Double</span>]
 <span class="ot">&gt;</span> acceptOrRejects seed nIters <span class="fu">=</span>
 <span class="ot">&gt;</span>   evalState (replicateM nIters (sample stdUniform))
-<span class="ot">&gt;</span>   (pureMT <span class="fu">$</span> fromIntegral seed)</code></pre>
+<span class="ot">&gt;</span>   (pureMT <span class="fu">$</span> fromIntegral seed)</code></pre></div>
 <p>The acceptance probability for accepting the new location over the old location is then:</p>
-<pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; acceptanceProb ::</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="co">-- ^ Proposal parameters</span>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; acceptanceProb ::</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="co">-- ^ Proposal parameters</span>
 <span class="ot">&gt;</span>                <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="co">-- ^ Old parameters </span>
 <span class="ot">&gt;</span>                <span class="ot">-&gt;</span> <span class="dt">Double</span>
 <span class="ot">&gt;</span> acceptanceProb a' b' sd' a b sd <span class="fu">=</span>
-<span class="ot">&gt;</span>     exp ((logposterior a' b' sd') <span class="fu">-</span> (logposterior a b sd))</code></pre>
+<span class="ot">&gt;</span>     exp ((logposterior a' b' sd') <span class="fu">-</span> (logposterior a b sd))</code></pre></div>
 <p>The core of the Metropolis algorithm is the following. We either advance to the proposed location or stay at the current location, depending on the acceptance probability:</p>
-<pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; oneStep ::</span> (<span class="dt">Double</span>, <span class="dt">Double</span>, <span class="dt">Double</span>, <span class="dt">Int</span>)    <span class="co">-- ^ Current location</span>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; oneStep ::</span> (<span class="dt">Double</span>, <span class="dt">Double</span>, <span class="dt">Double</span>, <span class="dt">Int</span>)    <span class="co">-- ^ Current location</span>
 <span class="ot">&gt;</span>         <span class="ot">-&gt;</span> (<span class="dt">Double</span>, <span class="dt">Double</span>, <span class="dt">Double</span>, <span class="dt">Double</span>) <span class="co">-- ^ Delta location and acceptance probability</span>
 <span class="ot">&gt;</span>         <span class="ot">-&gt;</span> (<span class="dt">Double</span>, <span class="dt">Double</span>, <span class="dt">Double</span>, <span class="dt">Int</span>)    <span class="co">-- ^ New state</span>
 <span class="ot">&gt;</span> oneStep (a, b, sd, nAccs) (da, db, dsd, acceptOrReject) <span class="fu">=</span>
 <span class="ot">&gt;</span>   <span class="kw">if</span> acceptOrReject <span class="fu">&lt;</span> acceptanceProb (a <span class="fu">+</span> da) (b <span class="fu">+</span> db) (sd <span class="fu">+</span> dsd) a b sd
 <span class="ot">&gt;</span>   <span class="kw">then</span> (a <span class="fu">+</span> da, b <span class="fu">+</span> db, sd <span class="fu">+</span> dsd, nAccs <span class="fu">+</span> <span class="dv">1</span>)
-<span class="ot">&gt;</span>   <span class="kw">else</span> (a, b, sd, nAccs)</code></pre>
+<span class="ot">&gt;</span>   <span class="kw">else</span> (a, b, sd, nAccs)</code></pre></div>
 <p>The complete Markov <code>chain</code> can be generated from a starting location and a succession of single steps:</p>
-<pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> startA, startB,<span class="ot"> startSd ::</span> <span class="dt">Double</span>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> startA, startB,<span class="ot"> startSd ::</span> <span class="dt">Double</span>
 <span class="ot">&gt;</span> startA <span class="fu">=</span> <span class="dv">4</span>  <span class="co">-- ^ All start values are a little off</span>
 <span class="ot">&gt;</span> startB <span class="fu">=</span> <span class="dv">1</span>  <span class="co">--   to show that the algorithm converges</span>
 <span class="ot">&gt;</span> startSd <span class="fu">=</span> <span class="dv">9</span> <span class="co">--   to the true posterior after burn in</span>
@@ -202,9 +202,9 @@ Log-likelihood <span class="math">\(p(y|a, b=0, \sigma=10, x)\)</span>
 <span class="ot">&gt;</span>   zip4 (normalisedProposals seed <span class="fl">0.3</span> nIters)    
 <span class="ot">&gt;</span>     (normalisedProposals (seed<span class="fu">+</span><span class="dv">999</span>) <span class="fl">1.5</span> nIters) 
 <span class="ot">&gt;</span>     (normalisedProposals (seed<span class="fu">+</span><span class="dv">1</span>) <span class="fl">2.0</span> nIters )  
-<span class="ot">&gt;</span>     (acceptOrRejects (seed<span class="fu">+</span><span class="dv">2</span>) nIters)</code></pre>
+<span class="ot">&gt;</span>     (acceptOrRejects (seed<span class="fu">+</span><span class="dv">2</span>) nIters)</code></pre></div>
 <p>The promise of the trace data is that it was drawn from the posterior distribution. So by looking at the trace of each parameter, we can directly derive quantities of interest (like an estimate of the expected value, and an estimate of the variance of this expected value). Here I want to generate a histogram from the trace data and export it as a <abbr title="JavaScript Object Notation">JSON</abbr> file for plotting. Additionally I want to export the last 1000 samples of the trace data to get a visual clue if consecutive samples are sufficiently uncorrelated.</p>
-<pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; hb ::</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; hb ::</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Double</span>
 <span class="ot">&gt;</span>    <span class="ot">-&gt;</span> <span class="dt">HBuilder</span> <span class="dt">Double</span> (<span class="dt">Data.Histogram.Generic.Histogram</span> <span class="dt">V.Vector</span> <span class="dt">H.BinD</span> <span class="dt">Double</span>)
 <span class="ot">&gt;</span> hb lower upper <span class="fu">=</span> forceDouble <span class="fu">-&lt;&lt;</span> mkSimple (H.binD lower numBins upper)
 <span class="ot">&gt;</span>     <span class="kw">where</span> numBins <span class="fu">=</span> <span class="dv">121</span>
@@ -235,12 +235,12 @@ Log-likelihood <span class="math">\(p(y|a, b=0, \sigma=10, x)\)</span>
 <span class="ot">&gt;</span>   exportTestData
 <span class="ot">&gt;</span>   exportLikelihoodA
 <span class="ot">&gt;</span>   consumeResults <span class="fu">.</span> unzip4 <span class="fu">.</span> chain <span class="fu">$</span> arbSeed
-<span class="ot">&gt;</span>   return ()        </code></pre>
-<p>And here is a histogram and trace of <span class="math">\(a\)</span>:</p>
+<span class="ot">&gt;</span>   return ()        </code></pre></div>
+<p>And here is a histogram and trace of <span class="math inline">\(a\)</span>:</p>
 <div class="row">
 <div class="col-sm-6">
 <p class="text-center">
-Histogram of <span class="math">\(a\)</span>
+Histogram of <span class="math inline">\(a\)</span>
 </p>
 <div id="chart_histogramA">
 
@@ -248,20 +248,20 @@ Histogram of <span class="math">\(a\)</span>
 </div>
 <div class="col-sm-6">
 <p class="text-center">
-Last 1000 values of trace of <span class="math">\(a\)</span>
+Last 1000 values of trace of <span class="math inline">\(a\)</span>
 </p>
 <div id="chart_traceA">
 
 </div>
 </div>
 </div>
-<p>The histogram (an approximation of the probability density function of the parameter <span class="math">\(a\)</span>) nicely summarizes the estimation result. As a measure of uncertainty, one often considers the 95 % highest probability density interval (HPDI), but for this demo the analysis shall stop here.</p>
+<p>The histogram (an approximation of the probability density function of the parameter <span class="math inline">\(a\)</span>) nicely summarizes the estimation result. As a measure of uncertainty, one often considers the 95 % highest probability density interval (HPDI), but for this demo the analysis shall stop here.</p>
 <p>If you look at the trace, you can see that sometimes it remains at the same location for a few draws, and sometimes a new location is accepted right away. This acceptance rate is an important parameter when adjusting the variance of the jumps (the second parameter of our <code>normalisedProposals</code> function). If the variance is too small, then the acceptance ratio will be close to 1.0, but the location will change very slowly so that many random draws are required until the trace had the chance to sufficiently explore the parameter space. On the other hand, if the variance is too large then hardly any new location will be accepted and the trace appears to be stuck. It is difficult to get the variance of the jump proposals right in the general case (and this the reason why so many libraries exist which implement <abbr title="Monte Carlo Markov Chains">MCMCs</abbr>). Here I just tuned the values manually until the acceptance ratio was around 0.4.</p>
-<p>For completeness, here are the histograms and parts of the traces for the parameters <span class="math">\(b\)</span> and <span class="math">\(\sigma\)</span>:</p>
+<p>For completeness, here are the histograms and parts of the traces for the parameters <span class="math inline">\(b\)</span> and <span class="math inline">\(\sigma\)</span>:</p>
 <div class="row">
 <div class="col-sm-6">
 <p class="text-center">
-Histogram of <span class="math">\(b\)</span>
+Histogram of <span class="math inline">\(b\)</span>
 </p>
 <div id="chart_histogramB">
 
@@ -269,7 +269,7 @@ Histogram of <span class="math">\(b\)</span>
 </div>
 <div class="col-sm-6">
 <p class="text-center">
-Last 1000 values of trace of <span class="math">\(b\)</span>
+Last 1000 values of trace of <span class="math inline">\(b\)</span>
 </p>
 <div id="chart_traceB">
 
@@ -279,7 +279,7 @@ Last 1000 values of trace of <span class="math">\(b\)</span>
 <div class="row">
 <div class="col-sm-6">
 <p class="text-center">
-Histogram of <span class="math">\(\sigma\)</span>
+Histogram of <span class="math inline">\(\sigma\)</span>
 </p>
 <div id="chart_histogramSd">
 
@@ -287,7 +287,7 @@ Histogram of <span class="math">\(\sigma\)</span>
 </div>
 <div class="col-sm-6">
 <p class="text-center">
-Last 1000 values of trace of <span class="math">\(\sigma\)</span>
+Last 1000 values of trace of <span class="math inline">\(\sigma\)</span>
 </p>
 <div id="chart_traceSd">
 

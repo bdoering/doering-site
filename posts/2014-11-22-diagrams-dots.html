@@ -70,27 +70,27 @@
 <p>I guess I have been thinking too much about random numbers and distributions lately … “If the only tool you have is a hammer, you tend to see every problem as a nail.”</p>
 <p>Well, random dots. I could do this by hand (which is not a very enlightening task, especially if we want to do about 100 photo pages), or find a little algorithm that does it for me. So below you can find my approach at generating random dots, where bigger dots are concentrated in the center.</p>
 <p>I used <a href="https://haskell.org">Haskell</a> and the fascinating <a href="http://projects.haskell.org/diagrams/">Diagrams</a> package, also as a way to explore a library that can directly generate <abbr title="scalable vector graphics">SVG</abbr> files. In fact, this page is actually <a href="https://www.haskell.org/haskellwiki/Literate_programming">literate Haskell</a>, so you might copy/pase the text for instance to <code>dots.lhs</code> and generate your own dots with</p>
-<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">runhaskell</span> dots.lhs -o dots.svg -w 800</code></pre>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">runhaskell</span> dots.lhs -o dots.svg -w 800</code></pre></div>
 <p>Each time you run the code, a different output is generated. Here are some examples:</p>
 <!-- Image gallery: https://github.com/blueimp/Bootstrap-image-Gallery -->
 <div id="links">
 <p><a href="2014-11-22-diagrams-dots/dots1.png" title="Dots 1" data-gallery> <img src="2014-11-22-diagrams-dots/thumbs/dots1.png" alt="Dots 1"> </a> <a href="2014-11-22-diagrams-dots/dots2.png" title="Dots 2" data-gallery> <img src="2014-11-22-diagrams-dots/thumbs/dots2.png" alt="Dots 2"> </a> <a href="2014-11-22-diagrams-dots/dots3.png" title="Dots 3" data-gallery> <img src="2014-11-22-diagrams-dots/thumbs/dots3.png" alt="Dots 3"> </a> <a href="2014-11-22-diagrams-dots/dots4.png" title="Dots 4" data-gallery> <img src="2014-11-22-diagrams-dots/thumbs/dots4.png" alt="Dots 4"> </a> <a href="2014-11-22-diagrams-dots/dots5.png" title="Dots 5" data-gallery> <img src="2014-11-22-diagrams-dots/thumbs/dots5.png" alt="Dots 5"> </a> <a href="2014-11-22-diagrams-dots/dots6.png" title="Dots 6" data-gallery> <img src="2014-11-22-diagrams-dots/thumbs/dots6.png" alt="Dots 6"> </a> <a href="2014-11-22-diagrams-dots/dots7.png" title="Dots 7" data-gallery> <img src="2014-11-22-diagrams-dots/thumbs/dots7.png" alt="Dots 7"> </a> <a href="2014-11-22-diagrams-dots/dots8.png" title="Dots 8" data-gallery> <img src="2014-11-22-diagrams-dots/thumbs/dots8.png" alt="Dots 8"> </a> <a href="2014-11-22-diagrams-dots/dots9.png" title="Dots 9" data-gallery> <img src="2014-11-22-diagrams-dots/thumbs/dots9.png" alt="Dots 9"> </a> <a href="2014-11-22-diagrams-dots/dots10.png" title="Dots 10" data-gallery> <img src="2014-11-22-diagrams-dots/thumbs/dots10.png" alt="Dots 10"> </a></p>
 </div>
 <h2 id="the-actual-code">The Actual Code!</h2>
-<pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">module</span> <span class="dt">Main</span> (main) <span class="kw">where</span>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">module</span> <span class="dt">Main</span> (main) <span class="kw">where</span>
 <span class="ot">&gt;</span> 
 <span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Data.Colour.SRGB</span>
 <span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Data.Random.Source</span>
 <span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Diagrams.Backend.SVG.CmdLine</span>
 <span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Diagrams.Prelude</span>
-<span class="ot">&gt;</span> <span class="kw">import qualified</span> <span class="dt">Data.Random</span> <span class="kw">as</span> <span class="dt">R</span></code></pre>
+<span class="ot">&gt;</span> <span class="kw">import qualified</span> <span class="dt">Data.Random</span> <span class="kw">as</span> <span class="dt">R</span></code></pre></div>
 <p>Each dot is defined by a coordinate, a size, and a color.</p>
-<pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Dot</span> <span class="fu">=</span> <span class="dt">Dot</span> { _<span class="ot">dotCenter ::</span> <span class="dt">R2</span>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Dot</span> <span class="fu">=</span> <span class="dt">Dot</span> { _<span class="ot">dotCenter ::</span> <span class="dt">R2</span>
 <span class="ot">&gt;</span>                , _<span class="ot">radius ::</span> <span class="dt">Double</span>
 <span class="ot">&gt;</span>                , _<span class="ot">color ::</span> <span class="dt">Colour</span> <span class="dt">Double</span> 
-<span class="ot">&gt;</span>                } <span class="kw">deriving</span> <span class="dt">Show</span></code></pre>
+<span class="ot">&gt;</span>                } <span class="kw">deriving</span> <span class="dt">Show</span></code></pre></div>
 <p>Let’s allow only certain colors from which we can choose.</p>
-<pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; colors ::</span> [<span class="dt">Colour</span> <span class="dt">Double</span>]
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; colors ::</span> [<span class="dt">Colour</span> <span class="dt">Double</span>]
 <span class="ot">&gt;</span> colors <span class="fu">=</span> map sRGB24read [
 <span class="ot">&gt;</span>           <span class="st">&quot;bf3131&quot;</span>,
 <span class="ot">&gt;</span>           <span class="st">&quot;f5b456&quot;</span>,
@@ -102,9 +102,9 @@
 <span class="ot">&gt;</span>           <span class="st">&quot;eb565c&quot;</span>,
 <span class="ot">&gt;</span>           <span class="st">&quot;d15f69&quot;</span>,
 <span class="ot">&gt;</span>           <span class="st">&quot;48bdbe&quot;</span>,
-<span class="ot">&gt;</span>           <span class="st">&quot;f1ede2&quot;</span>]</code></pre>
+<span class="ot">&gt;</span>           <span class="st">&quot;f1ede2&quot;</span>]</code></pre></div>
 <p><code>randomDot</code> generates a single dot with a random location, radius, and color. The location and the radius are drawn from a normal distribution whose standard distribution is influenced by the <code>x</code> argument. A large <code>x</code> results in, on average, small radii and a small location spread. Therefore, large dots are more likely at the origin (0,0).</p>
-<pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; randomDot ::</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">R.RVar</span> <span class="dt">Dot</span>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; randomDot ::</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">R.RVar</span> <span class="dt">Dot</span>
 <span class="ot">&gt;</span> randomDot x <span class="fu">=</span> <span class="kw">do</span>
 <span class="ot">&gt;</span>   <span class="kw">let</span> mu_rad <span class="fu">=</span> <span class="dv">15</span> <span class="fu">*</span> exp (<span class="fu">-</span><span class="dv">4</span> <span class="fu">*</span> x)
 <span class="ot">&gt;</span>       sigmaSq_rad <span class="fu">=</span> <span class="fl">0.3</span> <span class="fu">*</span> mu_rad
@@ -113,32 +113,32 @@
 <span class="ot">&gt;</span>   locY <span class="ot">&lt;-</span> R.sample (R.normal <span class="dv">0</span> sigmaSq_loc)
 <span class="ot">&gt;</span>   radius <span class="ot">&lt;-</span> abs <span class="fu">&lt;$&gt;</span> R.sample (R.normal mu_rad sigmaSq_rad)
 <span class="ot">&gt;</span>   color <span class="ot">&lt;-</span> R.sample (R.randomElement colors)
-<span class="ot">&gt;</span>   return <span class="fu">$</span> <span class="dt">Dot</span> (r2 (locX, locY)) radius color</code></pre>
+<span class="ot">&gt;</span>   return <span class="fu">$</span> <span class="dt">Dot</span> (r2 (locX, locY)) radius color</code></pre></div>
 <p>To get non-overlapping dots I do some trial and error: Generate a dot and compare with all previously generated dots. Only keep the new dot if it is not too close to any previously generated dots. This approach is not very efficient, but for 100 dots its just fine.</p>
-<pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; randomDots ::</span> [<span class="dt">Dot</span>] <span class="ot">-&gt;</span> [<span class="dt">Double</span>] <span class="ot">-&gt;</span> <span class="dt">IO</span> [<span class="dt">Dot</span>]
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; randomDots ::</span> [<span class="dt">Dot</span>] <span class="ot">-&gt;</span> [<span class="dt">Double</span>] <span class="ot">-&gt;</span> <span class="dt">IO</span> [<span class="dt">Dot</span>]
 <span class="ot">&gt;</span> randomDots dots [] <span class="fu">=</span> return dots
 <span class="ot">&gt;</span> randomDots dots (x<span class="fu">:</span>xs) <span class="fu">=</span> <span class="kw">do</span>
 <span class="ot">&gt;</span>   dot <span class="ot">&lt;-</span> R.sample <span class="fu">$</span> randomDot x
 <span class="ot">&gt;</span>   <span class="kw">if</span> any (tooClose dot) dots
 <span class="ot">&gt;</span>   <span class="kw">then</span> randomDots dots (x<span class="fu">:</span>xs)
-<span class="ot">&gt;</span>   <span class="kw">else</span> randomDots (dot<span class="fu">:</span>dots) xs</code></pre>
+<span class="ot">&gt;</span>   <span class="kw">else</span> randomDots (dot<span class="fu">:</span>dots) xs</code></pre></div>
 <p>The dots should not overlap. Actually, they should be separated a little, therefore the factor <code>1.1</code>.</p>
-<pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; tooClose ::</span> <span class="dt">Dot</span> <span class="ot">-&gt;</span> <span class="dt">Dot</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; tooClose ::</span> <span class="dt">Dot</span> <span class="ot">-&gt;</span> <span class="dt">Dot</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span>
 <span class="ot">&gt;</span> tooClose x y <span class="fu">=</span> dist <span class="fu">&lt;</span> <span class="fl">1.1</span> <span class="fu">*</span> radiusSum
 <span class="ot">&gt;</span>     <span class="kw">where</span>
 <span class="ot">&gt;</span>       dist <span class="fu">=</span> magnitude <span class="fu">$</span> _dotCenter x <span class="fu">^-^</span> _dotCenter y
-<span class="ot">&gt;</span>       radiusSum <span class="fu">=</span> _radius x <span class="fu">+</span> _radius y</code></pre>
+<span class="ot">&gt;</span>       radiusSum <span class="fu">=</span> _radius x <span class="fu">+</span> _radius y</code></pre></div>
 <p>Now the dots need to be converted to a diagram.</p>
-<pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; fromDot ::</span> <span class="dt">Dot</span> <span class="ot">-&gt;</span> <span class="dt">Diagram</span> <span class="dt">B</span> <span class="dt">R2</span>
-<span class="ot">&gt;</span> fromDot c <span class="fu">=</span> circle (_radius c) <span class="st"># fc (_color c)</span>
-<span class="ot">&gt;</span>                                <span class="st"># lw none</span>
-<span class="ot">&gt;</span>                                <span class="st"># translate (_dotCenter c)</span>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; fromDot ::</span> <span class="dt">Dot</span> <span class="ot">-&gt;</span> <span class="dt">Diagram</span> <span class="dt">B</span> <span class="dt">R2</span>
+<span class="ot">&gt;</span> fromDot c <span class="fu">=</span> circle (_radius c) <span class="fu">#</span> fc (_color c)
+<span class="ot">&gt;</span>                                <span class="fu">#</span> lw none
+<span class="ot">&gt;</span>                                <span class="fu">#</span> translate (_dotCenter c)
 <span class="ot">&gt;</span> 
 <span class="ot">&gt; dotsToDiagram ::</span> [<span class="dt">Dot</span>] <span class="ot">-&gt;</span> <span class="dt">Diagram</span> <span class="dt">B</span> <span class="dt">R2</span>
-<span class="ot">&gt;</span> dotsToDiagram <span class="fu">=</span> mconcat <span class="fu">.</span> map fromDot</code></pre>
+<span class="ot">&gt;</span> dotsToDiagram <span class="fu">=</span> mconcat <span class="fu">.</span> map fromDot</code></pre></div>
 <p>Command-line arguments are already implemented by the <code>Diagrams</code> package. Nice!</p>
-<pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; main ::</span> <span class="dt">IO</span> ()
-<span class="ot">&gt;</span> main <span class="fu">=</span> mainWith <span class="fu">.</span> dotsToDiagram <span class="fu">=&lt;&lt;</span> randomDots [] [<span class="fl">0.01</span>, <span class="fl">0.02</span><span class="fu">..</span><span class="fl">1.0</span>]</code></pre>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; main ::</span> <span class="dt">IO</span> ()
+<span class="ot">&gt;</span> main <span class="fu">=</span> mainWith <span class="fu">.</span> dotsToDiagram <span class="fu">=&lt;&lt;</span> randomDots [] [<span class="fl">0.01</span>, <span class="fl">0.02</span><span class="fu">..</span><span class="fl">1.0</span>]</code></pre></div>
 <p>And we are done …</p>
 <!-- The Bootstrap Image Gallery lightbox, should be a child element of the document body -->
 <div id="blueimp-gallery" class="blueimp-gallery" data-use-bootstrap-modal="false">
