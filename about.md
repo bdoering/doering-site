@@ -18,7 +18,13 @@ You can reach me at [bjoern.doering@gmail.com](mailto:bjoern.doering@gmail.com).
 Publications
 ------------
 
-Some selected publications:
+In the following I have listed some selected publications. For further publications and downloads see [ResearchGate](http://www.researchgate.net/profile/Bjoern_Doering).
+
+Oh, and my ORCID iD is <http://orcid.org/0000-0002-4257-1413>. Maybe it will help to work around the Björn Döring/Bjorn Doring/Bjoern Doering spelling problem?
+
+
+### Peer-Reviewed Articles
+
 
 * **Björn J. Döring**, Jens Reimann, Sebastian Raab, Matthias Jirousek, Daniel Rudolf, and Marco Schwerdt: [*The Three-Transponder Method: A Novel Method for Accurate Transponder RCS Calibration*](http://www.jpier.org/PIERB/pier.php?paper=14110406). Progress In Electromagnetics Research B, vol. 61, pp. 297--315, Dec. 2014.
 
@@ -30,9 +36,11 @@ Some selected publications:
 
 * **Björn J. Döring**, Philipp Looser, Matthias Jirousek, and Marco Schwerdt: [*Reference Target Correction Based on Point Target SAR Simulation*](https://www.researchgate.net/publication/225023631_Reference_Target_Correction_Based_on_Point_Target_SAR_Simulation). IEEE Transactions on Geoscience and Remote Sensing, vol. 50, no. 3, 2012.
 
-For  further publications and downloads see [ResearchGate](http://www.researchgate.net/profile/Bjoern_Doering).
 
-My ORCID iD is <http://orcid.org/0000-0002-4257-1413>. Maybe it will help to work around the Björn Döring/Bjorn Doring/Bjoern Doering problem?
+
+### Patent
+
+* **Björn Döring**, Marco Schwerdt, Matthias Jirousek, Daniel Rudolf, Jens Reimann, and Sebastian Raab: *Verfahren zur absoluten radiometrischen Kalibrierung des Radarr{\"u}ckstreuquerschnitts von Radarzielen*. German Patent 102,014,110,079, Jul. 9, 2015. Available online: [DPMA](https://register.dpma.de/DPMAregister/pat/PatSchrifteneinsicht?docId=DE102014110079B3), [Espacenet](http://worldwide.espacenet.com/publicationDetails/biblio?CC=DE&NR=102014110079B3&KC=B3&FT=D).
 
 
 Supervised Student's Work
