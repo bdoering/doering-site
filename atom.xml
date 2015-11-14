@@ -8,8 +8,16 @@
         <name>Björn J. Döring</name>
         <email>bjoern.doering@gmail.com</email>
     </author>
-    <updated>2015-10-23T00:00:00Z</updated>
+    <updated>2015-11-14T00:00:00Z</updated>
     <entry>
+    <title>Peace for Paris</title>
+    <link href="http://doering.io/posts/2015-11-14-Peace-for-Paris.html" />
+    <id>http://doering.io/posts/2015-11-14-Peace-for-Paris.html</id>
+    <published>2015-11-14T00:00:00Z</published>
+    <updated>2015-11-14T00:00:00Z</updated>
+    <summary type="html"><![CDATA[We must stand together!]]></summary>
+</entry>
+<entry>
     <title>A Self-Hosted Inbox for Large Files Power by Happstack and The Raspberry Pi</title>
     <link href="http://doering.io/posts/2015-10-23-happstack-upload-on-raspberry-pi.html" />
     <id>http://doering.io/posts/2015-10-23-happstack-upload-on-raspberry-pi.html</id>
