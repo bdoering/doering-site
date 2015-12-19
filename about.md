@@ -45,6 +45,8 @@ Oh, and my ORCID iD is <http://orcid.org/0000-0002-4257-1413>. Maybe it will hel
 Supervised Student's Work
 -------------------------
 
+* Carlos Henrique Severino: *Compact Feeding System for a P-Band Circular Horn Antenna*. Instituto Technológico de Aeronáutica, 2015.
+
 * Heinrich Axt: *Vergleichende Analyse von Antennenkonzepten und Antennenentwicklung für P-Band-Kalibriertransponder*. Hochschule für angewandte Wissenschaften Würzburg-Schweinfurt, 2014.
 
 * Sebastian Raab: *Planung und Durchführung einer Freifeld-RCS-Messreihe zur genauen Kalibrierung von Referenzzielen*. Hochschule für angewandte Wissenschaften Würzburg-Schweinfurt, Diplomarbeit, 2013.
