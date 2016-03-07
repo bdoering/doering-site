@@ -8,8 +8,16 @@
         <name>Björn J. Döring</name>
         <email>bjoern.doering@gmail.com</email>
     </author>
-    <updated>2015-11-14T00:00:00Z</updated>
+    <updated>2016-03-06T00:00:00Z</updated>
     <entry>
+    <title>OpenSCAD, Blender, and 3D Printing of PB-BD</title>
+    <link href="http://doering.io/posts/2016-03-06-openscad-blender-3d-printing.html" />
+    <id>http://doering.io/posts/2016-03-06-openscad-blender-3d-printing.html</id>
+    <published>2016-03-06T00:00:00Z</published>
+    <updated>2016-03-06T00:00:00Z</updated>
+    <summary type="html"><![CDATA[Exploiting perspective to generate a funny 3D object]]></summary>
+</entry>
+<entry>
     <title>Peace for Paris</title>
     <link href="http://doering.io/posts/2015-11-14-Peace-for-Paris.html" />
     <id>http://doering.io/posts/2015-11-14-Peace-for-Paris.html</id>

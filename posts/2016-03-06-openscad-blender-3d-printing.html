@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Personal webpage and blog">
+    <meta name="author" content="Björn J. Döring">
+    <link rel="icon" href="../favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
+
+    <title>OpenSCAD, Blender, and 3D Printing of PB-BD — Björn Döring</title>
+
+    
+    
+    
+    
+
+    <link href="../assets/css/bdoering.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+    
+    <div class="navbar navbar-default navbar-static-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../">BJÖRN DÖRING</a>
+        </div>
+        <div class="collapse navbar-collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="../index.html">Home</a></li>
+            <li><a href="../about.html">About</a></li>
+	    <li><a href="../atom.xml">Feed</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+
+    <div class="container">
+      <h1>OpenSCAD, Blender, and 3D Printing of PB-BD</h1>
+<div class="info">
+  Posted on March  6, 2016
+  
+</div>
+
+
+<div class="bs-callout bs-callout-toc">
+  <h2 class="contents">Contents</h2>
+  <ul>
+<li><a href="#what-this-is-about">What This Is About</a></li>
+<li><a href="#implementation-in-openscad">Implementation in OpenSCAD</a><ul>
+<li><a href="#placing-the-letters">Placing the Letters</a></li>
+<li><a href="#extruding-the-letters">Extruding the Letters</a></li>
+<li><a href="#intersecting-the-letters">Intersecting the Letters</a></li>
+</ul></li>
+<li><a href="#artistic-thinning-in-blender">“Artistic” Thinning in Blender</a></li>
+<li><a href="#final-result">Final Result</a></li>
+<li><a href="#conclusions">Conclusions</a></li>
+</ul>
+</div>
+
+
+
+<h2 id="what-this-is-about">What This Is About</h2>
+<p>For our wedding (so long ago already!) we got a nice voucher from good friends to create a custom 3D printed object, and now it was about time we did something about it! So this post is about the voucher, or rather the object that we made with it.</p>
+<p>We had many different ideas for things we could print out, but in the end we found the idea of a perspective sculpture interesting. There are already many interesting examples online, like this <a href="https://imgur.com/gallery/ndP8IQX">Yes/No sculpture</a> or these <a href="https://imgur.com/KezAIUF">animals</a>. To establish a connection to our wedding, we settled on creating a unifying object out of our initials PB-BD. So let’s see how that went!</p>
+<h2 id="implementation-in-openscad">Implementation in OpenSCAD</h2>
+<p>The core idea of a perspective sculpture is to exploit the perspective from two points of view which are for instance 90° apart from each other. This way, one can perceive two distinct 2D outlines from a single 3D object, depending on the point of view. The 3D object is formed as the intersection of the projection of these two 2D outlines.</p>
+<p>To generate this intersection, I used <a href="http://openscad.org">OpenSCAD</a>. OpenSCAD is an open-source application for creating 3D <abbr title="computer-aided design">CAD</abbr> objects, but instead of being based on a <abbr title="graphical user-interface">GUI</abbr>, the user simply describes the geometry as text in the <a href="https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/The_OpenSCAD_Language">OpenSCAD Language</a>.</p>
+<p>It was the first time that I used OpenSCAD, but apparently it is quite popular for open source hardware projects. It is simple and yet impressive to see <a href="http://www.openscad.org/gallery.html">what people can do with it</a>. The advantages are obvious: Since all designs are described by simple text files, sharing and collaboration is much easier than with a proprietary file format. Or have you ever tried to merge changes from two people into one 3D object in tools like Autodesk Inventor? Also, the OpenSCAD Language allows designs to be parameterized, so properties can be updated by simply changing some variables.</p>
+<p>The PB-BD object was actually a pretty simple object to create in OpenSCAD. The steps are basically:</p>
+<ol style="list-style-type: decimal">
+<li>Create a first 2D outline (PB).</li>
+<li>Extrude the outline.</li>
+<li>Create a second 2D outline (BD) on a plane which is rotated 90° with respect to the first drawing plane.</li>
+<li>Extrude the second object.</li>
+<li>Derive the intersection.</li>
+</ol>
+<p>This process is described in the following three sections. (Have a look at the <a href="http://www.openscad.org/documentation.html">OpenSCAD documentation</a> to follow along if you want.)</p>
+<h3 id="placing-the-letters">Placing the Letters</h3>
+<div class="sourceCode"><pre class="sourceCode c"><code class="sourceCode c"><span class="co">// Global variable which influences the resolution of the mesh</span>
+$fn = <span class="dv">60</span>; 
+
+<span class="co">// Constants for our geometry</span>
+font = <span class="st">&quot;Caviar Dreams&quot;</span>;
+letter_size = <span class="dv">50</span>;
+letter_height = <span class="dv">5</span>;
+hoffset = <span class="dv">50</span>;
+voffset = <span class="dv">6</span> + letter_size/<span class="dv">2</span>;
+
+module letter(l) {
+  <span class="co">// Use linear_extrude() to make the letters 3D objects as they</span>
+  <span class="co">// are only 2D shapes when only using text()</span>
+  linear_extrude(height = letter_height) {
+    text(l, size=letter_size, font=font, halign=<span class="st">&quot;center&quot;</span>, valign=<span class="st">&quot;center&quot;</span>);
+  }
+}
+
+<span class="kw">union</span>() {
+    <span class="co">// Base plate: Consists of a cylinder at the bottom and a flattened </span>
+    <span class="co">// sphere at qthe top</span>
+    linear_extrude(height=<span class="dv">3</span>) {
+        circle(<span class="dv">60</span>, $fn=<span class="fl">1.5</span>*$fn);
+    };
+    translate([<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">3</span>]) resize([<span class="dv">120</span>,<span class="dv">120</span>,<span class="dv">2</span>*<span class="dv">3</span>]) sphere($fn=<span class="fl">1.5</span>*$fn);
+    <span class="co">// Actual intersection of the letters</span>
+    <span class="kw">union</span>() {
+        translate([<span class="dv">0</span>,hoffset,voffset]) rotate([<span class="dv">90</span>,<span class="dv">0</span>,<span class="dv">0</span>])   letter(<span class="st">&quot;PB&quot;</span>);
+        translate([-hoffset,<span class="dv">0</span>,voffset]) rotate([<span class="dv">90</span>,<span class="dv">0</span>,<span class="dv">90</span>]) letter(<span class="st">&quot;BD&quot;</span>);
+    }   
+}</code></pre></div>
+<img class="img-responsive" alt="OpenSCAD: Before extrusion" width="740" height="390" src="2016-03-06-openscad-blender-3d-printing/openscad_before-extrusion.png" />
+<div class="text-center">
+<strong>Before extrusion.</strong>
+</div>
+<h3 id="extruding-the-letters">Extruding the Letters</h3>
+<div class="sourceCode"><pre class="sourceCode c"><code class="sourceCode c"><span class="co">// Global variable which influences the resolution of the mesh</span>
+$fn = <span class="dv">60</span>; 
+
+<span class="co">// Constants for our geometry</span>
+font = <span class="st">&quot;Caviar Dreams&quot;</span>;
+letter_size = <span class="dv">50</span>;
+letter_height = <span class="dv">100</span>;             <span class="co">// &lt;&lt;-- Increased letter_height</span>
+hoffset = <span class="dv">50</span>;
+voffset = <span class="dv">6</span> + letter_size/<span class="dv">2</span>;
+
+module letter(l) {
+  <span class="co">// Use linear_extrude() to make the letters 3D objects as they</span>
+  <span class="co">// are only 2D shapes when only using text()</span>
+  linear_extrude(height = letter_height) {
+    text(l, size=letter_size, font=font, halign=<span class="st">&quot;center&quot;</span>, valign=<span class="st">&quot;center&quot;</span>);
+  }
+}
+
+<span class="kw">union</span>() {
+    <span class="co">// Base plate: Consists of a cylinder at the bottom and a flattened </span>
+    <span class="co">// sphere at qthe top</span>
+    linear_extrude(height=<span class="dv">3</span>) {
+        circle(<span class="dv">60</span>, $fn=<span class="fl">1.5</span>*$fn);
+    };
+    translate([<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">3</span>]) resize([<span class="dv">120</span>,<span class="dv">120</span>,<span class="dv">2</span>*<span class="dv">3</span>]) sphere($fn=<span class="fl">1.5</span>*$fn);
+    <span class="co">// Actual intersection of the letters</span>
+    <span class="kw">union</span>() {
+        translate([<span class="dv">0</span>,hoffset,voffset]) rotate([<span class="dv">90</span>,<span class="dv">0</span>,<span class="dv">0</span>])   letter(<span class="st">&quot;PB&quot;</span>);
+        translate([-hoffset,<span class="dv">0</span>,voffset]) rotate([<span class="dv">90</span>,<span class="dv">0</span>,<span class="dv">90</span>]) letter(<span class="st">&quot;BD&quot;</span>);
+    }   
+}</code></pre></div>
+<img class="img-responsive" alt="OpenSCAD: After extrusion" width="740" height="390" src="2016-03-06-openscad-blender-3d-printing/openscad_before-intersection.png" />
+<div class="text-center">
+<strong>After extrusion.</strong>
+</div>
+<h3 id="intersecting-the-letters">Intersecting the Letters</h3>
+<div class="sourceCode"><pre class="sourceCode c"><code class="sourceCode c"><span class="co">// Global variable which influences the resolution of the mesh</span>
+$fn = <span class="dv">60</span>; 
+
+<span class="co">// Constants for our geometry</span>
+font = <span class="st">&quot;Caviar Dreams&quot;</span>;
+letter_size = <span class="dv">50</span>;
+letter_height = <span class="dv">100</span>;
+hoffset = <span class="dv">50</span>;
+voffset = <span class="dv">6</span> + letter_size/<span class="dv">2</span>;
+
+module letter(l) {
+  <span class="co">// Use linear_extrude() to make the letters 3D objects as they</span>
+  <span class="co">// are only 2D shapes when only using text()</span>
+  linear_extrude(height = letter_height) {
+    text(l, size=letter_size, font=font, halign=<span class="st">&quot;center&quot;</span>, valign=<span class="st">&quot;center&quot;</span>);
+  }
+}
+
+<span class="kw">union</span>() {
+    <span class="co">// Base plate: Consists of a cylinder at the bottom and a flattened </span>
+    <span class="co">// sphere at qthe top</span>
+    linear_extrude(height=<span class="dv">3</span>) {
+        circle(<span class="dv">60</span>, $fn=<span class="fl">1.5</span>*$fn);
+    };
+    translate([<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">3</span>]) resize([<span class="dv">120</span>,<span class="dv">120</span>,<span class="dv">2</span>*<span class="dv">3</span>]) sphere($fn=<span class="fl">1.5</span>*$fn);
+    <span class="co">// Actual intersection of the letters</span>
+    intersection() {     <span class="co">// &lt;&lt;-- Updated from union() to intersection()</span>
+        translate([<span class="dv">0</span>,hoffset,voffset]) rotate([<span class="dv">90</span>,<span class="dv">0</span>,<span class="dv">0</span>])   letter(<span class="st">&quot;PB&quot;</span>);
+        translate([-hoffset,<span class="dv">0</span>,voffset]) rotate([<span class="dv">90</span>,<span class="dv">0</span>,<span class="dv">90</span>]) letter(<span class="st">&quot;BD&quot;</span>);
+    }   
+}</code></pre></div>
+<img class="img-responsive" alt="OpenSCAD: After intersection" width="740" height="390" src="2016-03-06-openscad-blender-3d-printing/openscad_after-intersection.png" />
+<div class="text-center">
+<strong>After intersection.</strong>
+</div>
+<h2 id="artistic-thinning-in-blender">“Artistic” Thinning in Blender</h2>
+<p>The fascinating idea about perspective sculptures is that you cannot really guess what the object is supposed to be before you have not seen it from the right direction. For this, the OpenSCAD version of the PB-BD still looked to “clean”, so I wanted to remove parts which are not necessary to generate the PB-BD. After all, seen from one direction only one line needs to remain to create the 2D outline.</p>
+<p>Describing this thinning process in the OpenSCAD language would have been tedious, so instead I took the OpenSCAD-generated mesh and imported it into <a href="https://www.blender.org/">Blender</a>, another open-source program for 3D modelling.</p>
+<p>After the import in Blender, the sculpture obviously still looked like in OpenSCAD.</p>
+<p>
+<img class="img-responsive" alt="Blender: Geometry before thinning" width="1366" height="704" src="2016-03-06-openscad-blender-3d-printing/01_original.png" />
+<div class="text-center">
+<strong>Geometry before thinning.</strong>
+</div>
+</p>
+<p>Now I started to manually chop off different parts …</p>
+<p>
+<img class="img-responsive" alt="Blender: A bit of thinning applied" width="1366" height="704" src="2016-03-06-openscad-blender-3d-printing/02_first-intersect.png" />
+<div class="text-center">
+<strong>First part cut off.</strong>
+</div>
+</p>
+<p>… to eventually arrive at the final design:</p>
+<p>
+<div class="embed-responsive embed-responsive-16by9" align="center">
+<video class="embed-responsive-item" id="printing-result" width="1920" height="1080" controls src="2016-03-06-openscad-blender-3d-printing/blender.mp4">
+</video>
+</div>
+<div class="text-center">
+<strong>Final geometry after thinning.</strong>
+</div>
+</p>
+<p>The result was pleasing, and it was time to actually order the 3D printed object from <a href="http://www.shapeways.com/">Shapeways</a>. For that, I exported the mesh in the common <a href="https://en.wikipedia.org/wiki/STL_(file_format)">STL format</a> and uploaded it on the Shapeways website.</p>
+<p>Now that this was done, all that remained to do was to wait!</p>
+<h2 id="final-result">Final Result</h2>
+<p>About two weeks later we finally got our package. We are quite pleased with the result! Here goes the proof that the object could actually be printed! (Sorry for the poor video quality.)</p>
+<p>
+<div class="embed-responsive embed-responsive-16by9" align="center">
+<video class="embed-responsive-item" id="printing-result" width="1920" height="1080" controls src="2016-03-06-openscad-blender-3d-printing/printing-result.mp4">
+</video>
+</div>
+<div class="text-center">
+<strong>The 3D-printed beauty!</strong>
+</div>
+</p>
+<p>The design was made with parallel lines in mind, i. e., one should look at the object from an infinite distance. This video is partially so jagged because I tried to reproduce this situation: I went a bit further away with the camera and zoomed in. The alternative would have been to construct the object for a certain but closer distance, but when are you ever getting really close to a shelf to look at an object?</p>
+<h2 id="conclusions">Conclusions</h2>
+<p>All in all, I am quite satisfied with the process and the result. I learned how to use OpenScad along the way, refreshed my Blender foo, and now we have a nice geeky PB-BD sculpture at home to show to anybody who comes and visits – whether they want to see it or not :-)</p>
+
+<p class="text-center disqus-btn">
+  <button id="btn-interact" data-toggle="button" type="button" class="btn btn-default btn-bw">
+    <span class="glyphicon glyphicon-hand-down"></span>
+    Interact!
+  </button>
+</p>
+
+<div id="interact" class="hidden">
+  <!-- Flattr button -->
+  <script id="fb0cg6l">(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=bdoering&button=compact&url='+encodeURIComponent(document.URL);f.title='Flattr';f.height=20;f.width=110;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('fb0cg6l');</script>
+  
+  
+  <!-- Disqus comments -->
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+    var disqus_shortname = 'bdoering'; // required: replace example with your forum shortname
+    (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div> <!-- interact -->
+
+    </div><!-- /.container -->
+
+    <div class="footer">
+      <div class="container">
+	<p class="text-right">Site proudly generated by <a href="http://jaspervdj.be/hakyll/">Hakyll</a>!</p>
+      </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../assets/js/ie10-viewport-bug-workaround.js"></script>
+
+    <script src="../assets/js/post-interact.js"></script>
+
+
+  </body>
+</html>
+
