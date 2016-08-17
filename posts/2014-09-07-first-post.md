@@ -1,5 +1,5 @@
 ---
-title: First post: Barefoot Running &amp; Blogging
+title: "First post: Barefoot Running &amp; Blogging"
 description: How barefoot running and blogging fit together
 tags: misc
 ---

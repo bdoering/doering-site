@@ -33,19 +33,19 @@ postCtx = mconcat [ dateField "date" "%B %e, %Y"
 
 mathCtx :: Context String
 mathCtx = field "mathjax" $ \item -> do
-  metadata <- getMetadata $ itemIdentifier item
-  return $ if "mathjax" `M.member` metadata
+  mathjaxField <- getMetadataField (itemIdentifier item) "mathjax"
+  return $ if isJust mathjaxField
            then "<script type=\"text/javascript\" src=\"http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML\"></script>"
            else ""
 
 useTocCompiler_works item =
     let
-        test m = if (isJust (M.lookup "useToc" m))
+        test f = if (isJust f)
                  then pure (error $ "no string value for bool field:")
                  else empty
     in do
-      metadata <- getMetadata (itemIdentifier item)
-      return $ test metadata
+      useTocField <- getMetadataField (itemIdentifier item) "useToc"
+      return $ test useTocField
 
 -- | Creates a 'field' to use with the @$if()$@ template macro.
 boolField
