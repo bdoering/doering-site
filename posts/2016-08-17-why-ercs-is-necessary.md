@@ -19,11 +19,11 @@ Video on Why a Shift from RCS to ERCS is Necessary
 --------------------------------------------------
 
 <div align="center" class="embed-responsive embed-responsive-16by9">
-<video id="printing-result" class="embed-responsive-item" width="1920" height="1080" controls>
-  <track label="English" kind="subtitles" srclang="en" src="2016-08-17-why-ercs-is-necessary/why-ercs-is-necessary.vtt" default />
-  <source src="2016-08-17-why-ercs-is-necessary/why-ercs-is-necessary.mp4" type="video/mp4" />
-  <source src="2016-08-17-why-ercs-is-necessary/why-ercs-is-necessary.ogv" type="video/ogv" />
-  <source src="2016-08-17-why-ercs-is-necessary/why-ercs-is-necessary.webm" type="video/webm" />
+<video class="embed-responsive-item" width="1920" height="1080" controls>
+  <source src="2016-08-17-why-ercs-is-necessary/why-ercs-is-necessary.mp4" type="video/mp4">
+  <source src="2016-08-17-why-ercs-is-necessary/why-ercs-is-necessary.ogv" type="video/ogv">
+  <source src="2016-08-17-why-ercs-is-necessary/why-ercs-is-necessary.webm" type="video/webm">
+  <track label="English" kind="subtitles" srclang="en" src="2016-08-17-why-ercs-is-necessary/subtitles.vtt" default>
 </video>
 </div>
 <div class="text-center fig-caption">**Why a shift toward ERCS is necessary: A short summary.** (Enable subtitles!)</div>
