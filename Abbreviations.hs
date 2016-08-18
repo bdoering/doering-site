@@ -14,6 +14,7 @@ abbreviationFilter = replaceAll "%[a-zA-Z0-9_]+" newnaming
 abbreviations :: M.Map String String
 abbreviations = M.fromList
                 [ ("CAD", "computer-aided design")
+                , ("CEOS", "Committee on Earth Observation Satellites")
                 , ("ERCS", "equivalent radar cross section")
                 , ("GUI", "graphical user-interface")
                 , ("JSON", "JavaScript Object Notation")
