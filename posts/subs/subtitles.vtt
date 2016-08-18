@@ -1,0 +1,69 @@
+WEBVTT
+
+00:00:12.000 --> 00:00:17.000
+A SAR system (satellite) illuminates a scene and passes over an ideal point target, a metallic sphere (reddish color).
+
+00:00:20.000 --> 00:00:26.500
+The SAR instrument emits frequency modulated pulses (chirps) and records them again after reception.
+
+00:00:27.000 --> 00:00:37.000
+The reddish rectangular signal in range direction signifies the envelope of the received pulses (<i>ideal</i> target = flat frequency response = rectangular shape).
+
+00:00:49.000 --> 00:00:54.000
+The <i>ideal</i> target has no angular dependence. Therefore the chirp envelope in azimuth is also flat.
+
+00:00:55.000 --> 00:01:03.000
+Now the raw data is processed in range direction with an <i>ideal</i> replica (rectangular envelope).
+
+00:01:03.500 --> 00:01:07.500
+Analogously, the data is processed in azimuth, again with an <i>ideal</i> replica.
+
+00:01:08.500 --> 00:01:13.000
+The result is interpreted as a gray-scale image.
+
+00:01:13.000 --> 00:01:18.800
+The actual point target energy (the measurement result of the radiometric measurement) ...
+
+00:01:19.000 --> 00:01:22.000
+is the integral over the pixel intensities within the cross area.
+
+
+00:01:27.000 --> 00:01:33.000
+We now replace the ideal radar target with a real-world target (here: a corner reflector, a typical calibration target).
+
+00:01:33.300 --> 00:01:41.000
+The RCS of the corner reflector at the center frequency is identical to the RCS of the sphere from before.
+
+00:01:41.300 --> 00:01:55.000
+The frequency-dependent RCS of the real-world target produces recorded
+chirps with a deformed (not rectangular) envelope.
+
+00:01:56.000 --> 00:02:02.800
+The received pulses are also weighted in azimuth due to the angular-dependent RCS of the target.
+
+00:02:03.200 --> 00:02:12.000
+Now the raw data is processed again with ideal (flat) chirps.
+
+00:02:13.000 --> 00:02:21.000
+The measurement result is different, although the reference RCSs of the sphere and the corner reflector are identical.
+
+00:02:26.000 --> 00:02:34.500
+Same real-world target as before, but now the raw data is processed ...
+
+00:02:34.500 --> 00:02:44.000
+with weighted range and azimuth chirps (improved side-lobe suppression).
+
+00:02:44.000 --> 00:02:52.000
+The range and azimuth weighting is typically SAR system and mode dependent.
+
+00:02:53.000 --> 00:03:00.000
+After compression, the impulse response has been shaped indistinguishably both by the target and the processor.
+
+00:03:00.000 --> 00:03:05.000
+The radiometric measurement result is consequentely affected. 
+
+00:03:05.000 --> 00:03:11.000
+This has been ignored so far, leading to radiometric measurement errors (ranging from negligible to several decibels)...
+
+00:03:11.000 --> 00:03:14.400
+when results of different systems are compared.
