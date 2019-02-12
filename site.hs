@@ -1,16 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
-import           Control.Applicative (pure, empty)
 import           Data.Maybe
-import           Data.Monoid (mappend, (<>), mconcat)
+import           Data.Monoid ((<>), mconcat)
 import           Text.Pandoc 
-import           Control.Monad (forM_)
 import           Hakyll
-import qualified Data.Map as M
-import qualified Data.Set as S
 import           Abbreviations (abbreviationFilter)
 
-import Hakyll.Core.Identifier
-    
+
 --------------------------------------------------------------------
 -- Text filters
 --------------------------------------------------------------------
@@ -38,85 +33,15 @@ mathCtx = field "mathjax" $ \item -> do
            then "<script type=\"text/javascript\" src=\"http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML\"></script>"
            else ""
 
-useTocCompiler_works item =
-    let
-        test f = if (isJust f)
-                 then pure (error $ "no string value for bool field:")
-                 else empty
-    in do
-      useTocField <- getMetadataField (itemIdentifier item) "useToc"
-      return $ test useTocField
-
--- | Creates a 'field' to use with the @$if()$@ template macro.
-boolField
-    :: String
-    -> (Item a -> Bool)
-    -> Context a
-boolField name f = field name (\i -> if f i
-    then pure (error $ unwords ["no string value for bool field:",name])
-    else empty)
-
-
--- field "speakers-names" (\conf -> getSpeakerNameCompiler lang conf) `mappend`
-
-
-
--- getSpeakerNameCompiler lang conf =
---     let getName (id, m) =
---             fromMaybe "" (M.lookup "firstname" m) ++ " " ++
---             fromMaybe "" (M.lookup "lastname" m)
---     in do
---       speakerList <- getSpeakerList conf
---       speakers <- getSpeakers lang speakerList
---       return $ intercalate (", ") $ map getName speakers
-
-
-
-
---    (M.member "toc") (getMetadata (itemIdentifier item))
-
---isJust $ M.lookup "toc" (getMetadata (itemIdentifier item)) -- do
-              -- metadata <- getMetadata (itemIdentifier item)
-              -- -- isJust (M.lookup "toc" metadata)
-              -- False
-
--- \item -> ("toc"::String) `M.member` (getMetadata (itemIdentifier item))
-
--- getToc id = do
---   metadata <- getMetadata id
---   if isJust (M.lookup "toc" metadata)
---   then missingField -- return ""
---   else loadBody (id { identifierVersion = Just "toc"})
-                
--- getRoomClass id = do
--- md <- getMetadata id
--- return $ case (M.lookup "location" md) of
--- Just "Room 1" -> "event-maxi"
--- Just "Room 2" -> "event-mini"
--- Just "Trempolino" -> "event-trempolino"
--- _ -> ""
--- getConstRoomClassCtx id =
--- field "eventcolor" (const (getRoomClass id))
--- roomClassCtx = field "eventcolor" (getRoomClass . itemIdentifier)
-
--- field "eventcolor" (getRoomClass . itemIdentifier) `mappend`
-
-
-
--- tocCtx :: Context String
--- tocCtx
---     | "toc" `M.member` metadata
---     | otherwise = missingField
---     where
---       metadata <- getMetadata $ itemIdentifier item
-
-archiveCtx posts =
-  listField "posts" postCtx (return posts)
+archiveCtx :: [Item String] -> Context String
+archiveCtx ps =
+  listField "posts" postCtx (return ps)
   <> constField "title" "Archives"
   <> defaultContext
 
-indexCtx posts =
-  listField "posts" postCtx (return posts)
+indexCtx :: [Item String] -> Context String
+indexCtx ps =
+  listField "posts" postCtx (return ps)
     <> constField "title" "Home"
     <> defaultContext
 
@@ -143,8 +68,8 @@ index = do
   match "index.html" $ do
     route idRoute
     compile $ do
-      posts <- recentFirst =<< loadAll ("posts/*" .&&. hasNoVersion)
-      let idxCtx = indexCtx posts
+      ps <- recentFirst =<< loadAll ("posts/*" .&&. hasNoVersion)
+      let idxCtx = indexCtx ps
       getResourceBody
         >>= applyAsTemplate idxCtx
         >>= loadAndApplyTemplate "templates/default.html" idxCtx
@@ -171,18 +96,13 @@ posts = do
         >>= loadAndApplyTemplate "templates/default.html" postCtx
         >>= relativizeUrls
 
-postsToc :: Rules ()
-postsToc = do
-  match "posts/*" $ version "toc" $
-        compile pandocTocCompiler
-
 archive :: Rules ()
 archive = do
   create ["archive.html"] $ do
     route idRoute
     compile $ do
-      posts <- recentFirst =<< loadAll ("posts/*" .&&. hasNoVersion)
-      let archiveCtx' = archiveCtx posts
+      ps <- recentFirst =<< loadAll ("posts/*" .&&. hasNoVersion)
+      let archiveCtx' = archiveCtx ps
       makeItem ""
         >>= loadAndApplyTemplate "templates/archive.html" archiveCtx'
         >>= loadAndApplyTemplate "templates/default.html" archiveCtx'
@@ -209,19 +129,21 @@ atom = do
          -- Overwrite existing description field with complete post
          -- let feedCtx = bodyField "description" <> postCtx
          let feedCtx = postCtx
-         posts <- fmap (take 20) . recentFirst =<<
+         lastPosts <- fmap (take 20) . recentFirst =<<
                   loadAllSnapshots ("posts/*" .&&. hasNoVersion) "content"
-         renderAtom feedConfiguration feedCtx posts
+         renderAtom feedConfiguration feedCtx lastPosts
 
 --------------------------------------------------------------------
 -- Configuration
 --------------------------------------------------------------------
-
+pandocMathCompiler :: Compiler (Item String)
 pandocMathCompiler =
     let mathExtensions = [Ext_tex_math_dollars, Ext_tex_math_double_backslash,
                           Ext_latex_macros]
+        defaultExtensions :: Extensions
         defaultExtensions = writerExtensions defaultHakyllWriterOptions
-        newExtensions = foldr S.insert defaultExtensions mathExtensions
+        -- newExtensions = foldr S.insert defaultExtensions mathExtensions
+        newExtensions = foldr enableExtension defaultExtensions mathExtensions
         writerOptions = defaultHakyllWriterOptions {
                           writerExtensions = newExtensions,
                           writerHTMLMathMethod = MathJax ""
@@ -229,19 +151,13 @@ pandocMathCompiler =
     in pandocCompilerWith defaultHakyllReaderOptions writerOptions
 
 -- See http://julien.jhome.fr/posts/2013-05-14-adding-toc-to-posts.html
+pandocTocCompiler :: Compiler (Item String)
 pandocTocCompiler =
     let writerOptions = defaultHakyllWriterOptions {
                           writerTableOfContents = True
-                        , writerTemplate = "$toc$"
-                        , writerStandalone = True
+                        , writerTemplate = Just "$toc$"
                         }
     in pandocCompilerWith defaultHakyllReaderOptions writerOptions
-
--- compiler :: Compiler (Item String)
--- compiler = pandocCompilerWith defaultHakyllReaderOptions pandocOptions
-
--- pandocOptions :: WriterOptions
--- pandocOptions = defaultHakyllWriterOptions{ writerHTMLMathMethod = MathJax "" }
 
 cfg :: Configuration
 cfg = defaultConfiguration
@@ -272,9 +188,4 @@ main = hakyllWith cfg $ do
   atom
 
   match "posts/*" $ version "toc" $
-        compile $ pandocCompilerWith defaultHakyllReaderOptions
-                defaultHakyllWriterOptions {
-                          writerTableOfContents = True
-                        , writerTemplate = "$toc$"
-                        , writerStandalone = True
-                        }
+        compile pandocTocCompiler
