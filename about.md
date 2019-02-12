@@ -2,28 +2,33 @@
 title: About
 ---
 
-About
-=====
+# About
 
-Hi, I am Björn Döring, and this is my private blog. I work at [DLR](http://www.dlr.de) (the German Aerospace Center) in Oberpfaffenhofen near Munich, Germany. Our [institute's](http://www.dlr.de/hr/en) principal topic is [synthetic aperture radar](https://en.wikipedia.org/wiki/Synthetic_aperture_radar) (SAR), and I am involved in the calibration of systems like [TerraSAR-X](http://www.dlr.de/eo/en/desktopdefault.aspx/tabid-5725/9296_read-15979/), [TanDEM-X](http://www.dlr.de/eo/en/desktopdefault.aspx/tabid-5727/10086_read-21046/), and [Sentinel-1](http://www.esa.int/Our_Activities/Observing_the_Earth/Copernicus/Sentinel-1). I quite enjoy designing and building new hard- and software to get as much performance out of the instruments as possible, and so completing a PhD on the side was a great addition to my normal work. Otherwise, I enjoy running, swimming, biking, and exploring France and its culture where my wife and I finally moved to!
+Hi, I am Björn Döring, and this is my private blog. I work as a team leader for [Groupe SII](http://www.sii.fr) in the Paris area, where I help build awesome software for various aerospace projects.
+
+Before moving to France in 2015, I worked at [DLR](http://www.dlr.de) (the German Aerospace Center) in Oberpfaffenhofen near Munich. It is certainly there that I not only learned a lot about radars (hardware *and* software), but were I also got my first experiences in leading projects. Finishing my PhD there allowed me to push myself further, and above all to stay curious and inventive!
+
+And otherwise? I enjoy running, swimming, biking, and exploring France and its culture together with my family!
 
 
 
-Contact
--------
+## Contact
 
 You can reach me at [bjoern@doering.io](mailto:bjoern@doering.io). My OpenPGP key is [B8E29B30](assets/files/bjoern-doering-pubkey.asc).
 
 
-Publications
-------------
+## Publications
 
 In the following I have listed some selected publications. For further publications and downloads see [ResearchGate](http://www.researchgate.net/profile/Bjoern_Doering).
 
 Oh, and my ORCID iD is <http://orcid.org/0000-0002-4257-1413>. Maybe it will help to work around the Björn Döring/Bjorn Doring/Bjoern Doering spelling problem?
 
+### PhD Thesis
 
-### Peer-Reviewed Articles
+* Björn J. Döring: [*Traceable Radiometric Calibration of Synthetic Aperture Radars*](https://www.researchgate.net/publication/303021941_Traceable_Radiometric_Calibration_of_Synthetic_Aperture_Radars). Feb. 2016.
+
+
+### Selected Peer-Reviewed Articles
 
 * Björn J. Döring, Marco Schwerdt: [*The SAR Passband Problem: Analytical Model and Possible Practical Solutions*](https://www.researchgate.net/publication/283432623_The_SAR_Passband_Problem_Analytical_Model_and_Possible_Practical_Solutions). IEEE Transactions on Geoscience and Remote Sensing (in press).
 
@@ -37,13 +42,20 @@ Oh, and my ORCID iD is <http://orcid.org/0000-0002-4257-1413>. Maybe it will hel
 
 
 
-### Patent
+### Patents
 
+
+* Björn Döring and Marco Schwerdt: *Winkelreflektorvorrichtung mit einstellbarer Höhenmehrdeutigkeit für SAR-Anwendungen*, German patent 10,2016,208,508.5, Nov. 2018. Available online: [DPMA](https://register.dpma.de/DPMAregister/pat/register?AKZ=1020162085085&CURSOR=3), [Espacenet](https://worldwide.espacenet.com/publicationDetails/biblio?II=0&ND=3&adjacent=true&locale=en_EP&FT=D&date=20171123&CC=DE&NR=102016208508A1&KC=A1#).
+* Jens Reimann, Björn Döring, Marco Schwerdt, Daniel Rudolf, and Sebastian Raab: *Verfahren zur Kalibrierung eines aktiven Sensorsystems*. German Patent 10,2016,101,898.8, Apr. 2017. Available online: [DPMA](https://register.dpma.de/DPMAregister/pat/register?AKZ=1020161018988&CURSOR=0), [Espacenet](https://worldwide.espacenet.com/publicationDetails/biblio?II=0&ND=3&adjacent=true&locale=en_EP&FT=D&date=20190117&CC=US&NR=2019018105A1&KC=A1#).
+* Björn Döring and Marco Schwerdt: *Synthetik-Apertur-Radarverfahren und Synthetik-Apertur-Radarsystem*, German Patent 10,2016,224,962.2, Jan. 2018. Available online: [DPMA](https://register.dpma.de/DPMAregister/pat/register?AKZ=1020162249622&CURSOR=1), [Espacenet](https://worldwide.espacenet.com/publicationDetails/biblio?II=0&ND=3&adjacent=true&locale=en_EP&FT=D&date=20180111&CC=DE&NR=102016224962B3&KC=B3#).
 * Björn Döring, Marco Schwerdt, Matthias Jirousek, Daniel Rudolf, Jens Reimann, and Sebastian Raab: *Verfahren zur absoluten radiometrischen Kalibrierung des Radarrückstreuquerschnitts von Radarzielen*. German Patent 102,014,110,079, Jul. 9, 2015. Available online: [DPMA](https://register.dpma.de/DPMAregister/pat/PatSchrifteneinsicht?docId=DE102014110079B3), [Espacenet](http://worldwide.espacenet.com/publicationDetails/biblio?CC=DE&NR=102014110079B3&KC=B3&FT=D).
 
 
-Supervised Student's Work
--------------------------
+## Supervised Student's Work
+
+* Bushan Pawar: *Entwicklung eines Prototypen für einen Mehrkanaltransponder*, Dec. 2016.
+
+* Sravan Kumar Aitha: *Development, Manufacturing and Testing of a P- and L-Band Outdoor Horn Antenna*, May 2016.
 
 * Carlos Henrique Severino: *Compact Feeding System for a P-Band Circular Horn Antenna*. Instituto Technológico de Aeronáutica, 2015.
 
