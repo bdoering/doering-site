@@ -8,8 +8,16 @@
         <name>Björn J. Döring</name>
         <email>bjoern.doering@gmail.com</email>
     </author>
-    <updated>2016-08-17T00:00:00Z</updated>
+    <updated>2019-02-15T00:00:00Z</updated>
     <entry>
+    <title>Tricking the Prefecture's Appointment Reservation System</title>
+    <link href="http://doering.io/posts/2019-02-15-prefecture-nanterre.html" />
+    <id>http://doering.io/posts/2019-02-15-prefecture-nanterre.html</id>
+    <published>2019-02-15T00:00:00Z</published>
+    <updated>2019-02-15T00:00:00Z</updated>
+    <summary type="html"><![CDATA[Securing a rare appointment at the Prefecture Nanterre]]></summary>
+</entry>
+<entry>
     <title>Why a Shift Toward Equivalent Radar Cross Section (ERCS) is Necessary</title>
     <link href="http://doering.io/posts/2016-08-17-why-ercs-is-necessary.html" />
     <id>http://doering.io/posts/2016-08-17-why-ercs-is-necessary.html</id>
